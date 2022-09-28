@@ -49,7 +49,7 @@ fn main() -> Result<(), String> {
                 rand::random::<u8>(),
             ));
         }
-        time_passed = time_passed + 1;
+        time_passed += 1;
 
         canvas.present();
 
