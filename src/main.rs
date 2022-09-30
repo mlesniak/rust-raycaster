@@ -8,10 +8,10 @@ use std::time::Duration;
 
 // SNES resolution, scaled up.
 // Opinionated.
-const WIDTH: i32 = 265;
-const HEIGHT: i32 = 224;
-const FPS: u32 = 30;
 const SCALE: i32 = 3;
+const WIDTH: i32 = 265 * SCALE;
+const HEIGHT: i32 = 224 * SCALE;
+const FPS: u32 = 30;
 
 trait Graphics {
     fn pixel(&mut self, x: i32, y: i32, c: Color);
