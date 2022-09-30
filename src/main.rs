@@ -30,11 +30,11 @@ fn main() -> Result<(), String> {
             break;
         }
         background(&mut canvas);
-        render(&mut canvas)?;
+
+        render_random_points(&mut canvas)?;
+        render_sinus(&mut canvas)?;
 
         canvas.present();
-
-        // Non-adaptive FPS loop.
         std::thread::sleep(Duration::new(0, 1_000_000_000u32 / FPS));
     }
 
@@ -61,10 +61,26 @@ fn event_handling(event_pump: &mut EventPump) -> bool {
     return false;
 }
 
-fn render(canvas: &mut WindowCanvas) -> Result<(), String> {
-    canvas.set_draw_color(Color::RED);
+fn render_random_points(canvas: &mut WindowCanvas) -> Result<(), String> {
+    for x in 0..WIDTH {
+        for y in 0..HEIGHT {
+            canvas.set_draw_color(Color::RGB(
+                rand::random::<u8>(),
+                rand::random::<u8>(),
+                rand::random::<u8>(),
+            ));
+            canvas.draw_point(Point::new(x, y))?;
+        }
+    }
+
+    Ok(())
+}
+
+fn render_sinus(canvas: &mut WindowCanvas) -> Result<(), String> {
     let scale = 50.0;
     let stretch = 40.0;
+
+    canvas.set_draw_color(Color::RED);
     for x in 0..WIDTH {
         let xf = x as f64 / stretch;
         canvas.draw_point(Point::new(x, HEIGHT / 2 + (xf.sin() * scale) as i32))?;
