@@ -1,49 +1,14 @@
+use std::time::Duration;
+
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
-use sdl2::render::WindowCanvas;
 use sdl2::*;
-use std::time::Duration;
 
-// SNES resolution, scaled up.
-// Opinionated.
-const SCALE: i32 = 3;
-const WIDTH: i32 = 265 * SCALE;
-const HEIGHT: i32 = 224 * SCALE;
+const WIDTH: i32 = 800;
+const HEIGHT: i32 = 800;
 const FPS: u32 = 30;
-
-trait Graphics {
-    fn pixel(&mut self, x: i32, y: i32, c: Color);
-    fn clear(&mut self, c: Color);
-    fn show(&mut self);
-}
-
-struct SDL2Renderer<'a> {
-    canvas: &'a mut WindowCanvas,
-}
-
-impl SDL2Renderer<'_> {
-    fn new(canvas: &mut WindowCanvas) -> SDL2Renderer {
-        SDL2Renderer { canvas }
-    }
-}
-
-impl Graphics for SDL2Renderer<'_> {
-    fn pixel(&mut self, x: i32, y: i32, c: Color) {
-        self.canvas.set_draw_color(c);
-        self.canvas.draw_point(Point::new(x, y)).unwrap();
-    }
-
-    fn clear(&mut self, c: Color) {
-        self.canvas.set_draw_color(c);
-        self.canvas.clear();
-    }
-
-    fn show(&mut self) {
-        self.canvas.present();
-    }
-}
 
 fn main() -> Result<(), String> {
     let sdl_context = init()?;
@@ -59,12 +24,6 @@ fn main() -> Result<(), String> {
     let mut canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
     let mut event_pump = sdl_context.event_pump()?;
 
-    canvas.set_draw_color(Color::RGB(200, 200, 200));
-    canvas.clear();
-    canvas.present();
-
-    let mut graphics = SDL2Renderer::new(&mut canvas);
-
     'main_loop: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -77,11 +36,15 @@ fn main() -> Result<(), String> {
             }
         }
 
-        graphics.clear(Color::BLACK);
-        for i in 100..200 {
-            graphics.pixel(i, 100, Color::RED);
+        canvas.set_draw_color(Color::BLACK);
+        canvas.clear();
+
+        canvas.set_draw_color(Color::RED);
+        for x in 0..WIDTH {
+            canvas.draw_point(Point::new(x, HEIGHT / 2))?;
         }
-        graphics.show();
+
+        canvas.present();
 
         // Non-adaptive FPS loop.
         std::thread::sleep(Duration::new(0, 1_000_000_000u32 / FPS));
