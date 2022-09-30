@@ -63,8 +63,11 @@ fn event_handling(event_pump: &mut EventPump) -> bool {
 
 fn render(canvas: &mut WindowCanvas) -> Result<(), String> {
     canvas.set_draw_color(Color::RED);
+    let scale = 50.0;
+    let stretch = 40.0;
     for x in 0..WIDTH {
-        canvas.draw_point(Point::new(x, HEIGHT / 2))?;
+        let xf = x as f64 / stretch;
+        canvas.draw_point(Point::new(x, HEIGHT / 2 + (xf.sin() * scale) as i32))?;
     }
 
     Ok(())
