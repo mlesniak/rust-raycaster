@@ -30,8 +30,7 @@ fn main() -> Result<(), String> {
     let mut tx = texture_creator
         .create_texture_streaming(None, DIMENSIONS.0, DIMENSIONS.1)
         .unwrap();
-    let mut pixels: Vec<u8> = Vec::new();
-    pixels.resize((DIMENSIONS.0 * DIMENSIONS.1 * 4) as usize, 0);
+    let mut pixels: Vec<u8> = vec![0; (DIMENSIONS.0 * DIMENSIONS.1 * 4) as usize];
 
     let mut rng = StdRand::default();
 
