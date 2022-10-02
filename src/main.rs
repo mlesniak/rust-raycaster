@@ -13,18 +13,7 @@ const DIMENSIONS: (u32, u32) = (640, 360);
 const DIMENSIONS: (u32, u32) = (1920, 1080);
 
 fn main() -> Result<(), String> {
-    let sdl_context = init()?;
-    let video_subsystem = sdl_context.video()?;
-
-    let window = video_subsystem
-        .window("pixel demo", DIMENSIONS.0, DIMENSIONS.1)
-        .position_centered()
-        .opengl()
-        .build()
-        .map_err(|e| e.to_string())?;
-
-    let canvas: &mut WindowCanvas = &mut window.into_canvas().build().map_err(|e| e.to_string())?;
-    let mut event_pump = sdl_context.event_pump()?;
+    let (mut canvas, mut event_pump) = initialize_sdl();
 
     let texture_creator = canvas.texture_creator();
     let mut tx = texture_creator
@@ -40,7 +29,7 @@ fn main() -> Result<(), String> {
         if event_handling(&mut event_pump) {
             break;
         }
-        background(canvas);
+        background(&mut canvas);
 
         for i in (0..(DIMENSIONS.0 * DIMENSIONS.1 * 4) as usize).step_by(4) {
             pixels[i] = (rng.next_u64() % 256) as u8;
@@ -63,6 +52,27 @@ fn main() -> Result<(), String> {
     }
 
     Ok(())
+}
+
+fn initialize_sdl() -> (WindowCanvas, EventPump) {
+    let sdl_context = init().expect("General SDL error");
+    let video_subsystem = sdl_context.video().expect("Video subsystem error");
+
+    let window = video_subsystem
+        .window("pixel demo", DIMENSIONS.0, DIMENSIONS.1)
+        .position_centered()
+        .opengl()
+        .build()
+        .map_err(|e| e.to_string())
+        .expect("Window subsystem error");
+
+    let canvas: WindowCanvas = window
+        .into_canvas()
+        .build()
+        .map_err(|e| e.to_string())
+        .expect("Canvas subsystem error");
+    let event_pump = sdl_context.event_pump().expect("Event Pump error");
+    (canvas, event_pump)
 }
 
 fn background(canvas: &mut WindowCanvas) {
