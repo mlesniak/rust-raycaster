@@ -9,8 +9,10 @@ use sdl2::rect::{Point, Rect};
 use sdl2::render::WindowCanvas;
 use sdl2::*;
 
-const WIDTH: u32 = 2560;
-const HEIGHT: u32 = 1440;
+// const WIDTH: u32 = 2560;
+// const HEIGHT: u31 = 1440;
+const WIDTH: u32 = 640;
+const HEIGHT: u32 = 360;
 const LENGTH: usize = (WIDTH * HEIGHT) as usize * 4;
 const FPS: u128 = 60;
 
@@ -33,7 +35,10 @@ fn main() -> Result<(), String> {
     let mut tx = texture_creator
         .create_texture_streaming(None, WIDTH, HEIGHT)
         .unwrap();
-    let mut pixels: Box<[u8; LENGTH]> = Box::new([0; LENGTH]);
+    let mut pixels: Vec<u8> = Vec::new();
+    for _ in 0..(WIDTH * HEIGHT * 4) {
+        pixels.push(0);
+    }
 
     let mut c: u8 = 0;
     let mut dir: i32 = 1;
@@ -44,7 +49,7 @@ fn main() -> Result<(), String> {
         }
         background(canvas);
 
-        for i in (1..(WIDTH * HEIGHT * 4) as usize).step_by(4) {
+        for i in (0..(WIDTH * HEIGHT * 4) as usize).step_by(4) {
             pixels[i] = c;
             pixels[i + 1] = c / 2;
             pixels[i + 2] = c / 3;
@@ -65,9 +70,9 @@ fn main() -> Result<(), String> {
         // }
         let d3 = SystemTime::now().duration_since(d1).unwrap().as_millis();
         // if d3 > 20 {
-        if c % 10 == 0 {
-            println!("{}", d3);
-        }
+        // if c % 10 == 0 {
+        println!("{}", d3);
+        // }
         // }
     }
 
