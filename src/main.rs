@@ -1,10 +1,6 @@
-use std::collections::HashMap;
-use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
-
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
-use sdl2::rect::{Point, Rect};
 use sdl2::render::WindowCanvas;
 use sdl2::*;
 
@@ -27,8 +23,7 @@ fn main() -> Result<(), String> {
         .build()
         .map_err(|e| e.to_string())?;
 
-    let mut canvas: &mut WindowCanvas =
-        &mut window.into_canvas().build().map_err(|e| e.to_string())?;
+    let canvas: &mut WindowCanvas = &mut window.into_canvas().build().map_err(|e| e.to_string())?;
     let mut event_pump = sdl_context.event_pump()?;
 
     let texture_creator = canvas.texture_creator();
@@ -36,9 +31,7 @@ fn main() -> Result<(), String> {
         .create_texture_streaming(None, DIMENSIONS.0, DIMENSIONS.1)
         .unwrap();
     let mut pixels: Vec<u8> = Vec::new();
-    for _ in 0..(DIMENSIONS.0 * DIMENSIONS.1 * 4) {
-        pixels.push(0);
-    }
+    pixels.resize((DIMENSIONS.0 * DIMENSIONS.1 * 4) as usize, 0);
 
     let mut rng = StdRand::default();
 
@@ -91,5 +84,5 @@ fn event_handling(event_pump: &mut EventPump) -> bool {
         }
     }
 
-    return false;
+    false
 }
