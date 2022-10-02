@@ -10,19 +10,18 @@ use sdl2::*;
 
 use tinyrand::{Rand, StdRand};
 
-const WIDTH: u32 = 2560;
-const HEIGHT: u32 = 1440;
-// const WIDTH: u32 = 640;
-// const HEIGHT: u32 = 360;
-const LENGTH: usize = (WIDTH * HEIGHT) as usize * 4;
-const FPS: u128 = 60;
+#[cfg(debug_assertions)]
+const DIMENSIONS: (u32, u32) = (640, 360);
+
+#[cfg(not(debug_assertions))]
+const DIMENSIONS: (u32, u32) = (1920, 1080);
 
 fn main() -> Result<(), String> {
     let sdl_context = init()?;
     let video_subsystem = sdl_context.video()?;
 
     let window = video_subsystem
-        .window("pixel demo", WIDTH, HEIGHT)
+        .window("pixel demo", DIMENSIONS.0, DIMENSIONS.1)
         .position_centered()
         .opengl()
         .build()
@@ -34,10 +33,10 @@ fn main() -> Result<(), String> {
 
     let texture_creator = canvas.texture_creator();
     let mut tx = texture_creator
-        .create_texture_streaming(None, WIDTH, HEIGHT)
+        .create_texture_streaming(None, DIMENSIONS.0, DIMENSIONS.1)
         .unwrap();
     let mut pixels: Vec<u8> = Vec::new();
-    for _ in 0..(WIDTH * HEIGHT * 4) {
+    for _ in 0..(DIMENSIONS.0 * DIMENSIONS.1 * 4) {
         pixels.push(0);
     }
 
@@ -46,13 +45,12 @@ fn main() -> Result<(), String> {
     let mut c: u8 = 0;
     let mut dir: i32 = 1;
     loop {
-        let timer = Instant::now();
         if event_handling(&mut event_pump) {
             break;
         }
         background(canvas);
 
-        for i in (0..(WIDTH * HEIGHT * 4) as usize).step_by(4) {
+        for i in (0..(DIMENSIONS.0 * DIMENSIONS.1 * 4) as usize).step_by(4) {
             pixels[i] = (rng.next_u64() % 256) as u8;
             pixels[i + 1] = (rng.next_u64() % 256) as u8;
             pixels[i + 2] = (rng.next_u64() % 256) as u8;
@@ -61,14 +59,15 @@ fn main() -> Result<(), String> {
         if c == 255 || c == 0 {
             dir *= -1;
         }
-        tx.update(None, pixels.as_slice(), (WIDTH as usize * 4) as usize)
-            .unwrap();
+        tx.update(
+            None,
+            pixels.as_slice(),
+            (DIMENSIONS.0 as usize * 4) as usize,
+        )
+        .unwrap();
 
         canvas.copy(&tx, None, None)?;
         canvas.present();
-
-        let diff = Instant::now().duration_since(timer);
-        println!("{}", diff.as_millis());
     }
 
     Ok(())
