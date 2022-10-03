@@ -1,10 +1,7 @@
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::pixels::Color;
-use sdl2::render::WindowCanvas;
+use sdl2::render::{Texture, WindowCanvas};
 use sdl2::*;
-
-use tinyrand::{Rand, StdRand};
 
 #[cfg(debug_assertions)]
 const DIMENSIONS: (u32, u32) = (640, 360);
@@ -21,31 +18,20 @@ fn main() -> Result<(), String> {
         .unwrap();
     let mut pixels: Vec<u8> = vec![0; (DIMENSIONS.0 * DIMENSIONS.1 * 4) as usize];
 
-    let mut rng = StdRand::default();
-
-    let mut c: u8 = 0;
-    let mut dir: i32 = 1;
     loop {
         if event_handling(&mut event_pump) {
             break;
         }
-        background(&mut canvas);
 
-        for i in (0..(DIMENSIONS.0 * DIMENSIONS.1 * 4) as usize).step_by(4) {
-            pixels[i] = (rng.next_u64() % 256) as u8;
-            pixels[i + 1] = (rng.next_u64() % 256) as u8;
-            pixels[i + 2] = (rng.next_u64() % 256) as u8;
-        }
-        c = (c as i32 + dir) as u8;
-        if c == 255 || c == 0 {
-            dir *= -1;
-        }
         tx.update(
             None,
             pixels.as_slice(),
             (DIMENSIONS.0 as usize * 4) as usize,
         )
-        .unwrap();
+        .expect("Copying pixels to GPU texture did not work");
+
+        // Prevent mutable warning for the time being.
+        pixels[0] = 255;
 
         canvas.copy(&tx, None, None)?;
         canvas.present();
@@ -57,7 +43,6 @@ fn main() -> Result<(), String> {
 fn initialize_sdl() -> (WindowCanvas, EventPump) {
     let sdl_context = init().expect("General SDL error");
     let video_subsystem = sdl_context.video().expect("Video subsystem error");
-
     let window = video_subsystem
         .window("pixel demo", DIMENSIONS.0, DIMENSIONS.1)
         .position_centered()
@@ -65,19 +50,14 @@ fn initialize_sdl() -> (WindowCanvas, EventPump) {
         .build()
         .map_err(|e| e.to_string())
         .expect("Window subsystem error");
-
     let canvas: WindowCanvas = window
         .into_canvas()
         .build()
         .map_err(|e| e.to_string())
         .expect("Canvas subsystem error");
     let event_pump = sdl_context.event_pump().expect("Event Pump error");
-    (canvas, event_pump)
-}
 
-fn background(canvas: &mut WindowCanvas) {
-    canvas.set_draw_color(Color::BLACK);
-    canvas.clear();
+    (canvas, event_pump)
 }
 
 /// Return true if we shall quit.
