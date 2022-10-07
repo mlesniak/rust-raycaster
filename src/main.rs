@@ -1,81 +1,63 @@
+use std::time::{Duration, Instant};
+
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+use sdl2::pixels::Color;
+use sdl2::rect::Point;
 use sdl2::render::{Texture, WindowCanvas};
 use sdl2::*;
+use tinyrand::{Rand, StdRand};
+
+struct Dimension {
+    width: u32,
+    height: u32,
+}
 
 #[cfg(debug_assertions)]
-const DIMENSIONS: (u32, u32) = (640, 360);
+const DIMENSIONS: Dimension = Dimension {
+    width: 640,
+    height: 360,
+};
 
 #[cfg(not(debug_assertions))]
-const DIMENSIONS: (u32, u32) = (1920, 1080);
+const DIMENSIONS: Dimension = Dimension(640, 360);
 
 fn main() -> Result<(), String> {
     let (canvas, mut event_pump) = initialize_sdl();
 
-    // --- PROBLEM STARTS HERE ---
-    // Ideally, I'd like to move the whole "create a texture"
-    // segment into a separate function which just returns the
-    // texture to be used.
-    //
-    // As far as I've understood, this is not possible since
-    // the created texture is owned by the texture_creator and
-    // if we move this to a function, the texture_creator will
-    // get out of scope at the end of the function and destroy
-    // its owned texture as well since it gets created on the
-    // stack; I've also played around with returning RC<>s, but
-    // to no avail.
-    //
-    // But, are there some lifetime annotations (a concept which
-    // I've only partially grokked), which would make this
-    // possible?
-    //
-    // If this is not possible, doesn't it mean that the borrow
-    // checker disallows certain refactorings since scoping rules
-    // imply lifetime duration and memory allocation?
-    let texture_creator = canvas.texture_creator();
-    let mut tx = texture_creator
-        .create_texture_streaming(None, DIMENSIONS.0, DIMENSIONS.1)
-        .unwrap();
-    // --- END ---
-
-    let mut pixels: Vec<u8> = vec![0; (DIMENSIONS.0 * DIMENSIONS.1 * 4) as usize];
-
     let mut canvas = canvas;
+    let mut rand = StdRand::default();
+    let mut prev = Instant::now();
+
     loop {
         if event_handling(&mut event_pump) {
             break;
         }
+        let delta = Instant::now().duration_since(prev).as_millis();
 
-        tx.update(
-            None,
-            pixels.as_slice(),
-            (DIMENSIONS.0 as usize * 4) as usize,
-        )
-        .expect("Copying pixels to GPU texture did not work");
-
-        // Prevent mutable warning for the time being.
-        pixels[0] = 255;
-
-        canvas.copy(&tx, None, None)?;
-        canvas.present();
+        if delta > 1000 {
+            canvas.set_draw_color(Color::BLACK);
+            canvas.clear();
+            canvas.set_draw_color(Color::WHITE);
+            for x in (0..DIMENSIONS.width as i32).step_by(4) {
+                let y1 = (rand.next_u32() % DIMENSIONS.height) as i32;
+                let y2 = (rand.next_u32() % DIMENSIONS.height) as i32;
+                canvas.draw_line(Point::new(x, 0), Point::new(x, y1))?;
+                canvas.draw_line(Point::new(x, y2), Point::new(x, DIMENSIONS.height as i32))?;
+            }
+            canvas.present();
+            prev = Instant::now();
+        }
     }
 
     Ok(())
-}
-
-fn foo(canvas: &WindowCanvas) -> Texture {
-    let texture_creator = canvas.texture_creator();
-    let mut tx = texture_creator
-        .create_texture_streaming(None, DIMENSIONS.0, DIMENSIONS.1)
-        .unwrap();
-    tx
 }
 
 fn initialize_sdl() -> (WindowCanvas, EventPump) {
     let sdl_context = init().expect("General SDL error");
     let video_subsystem = sdl_context.video().expect("Video subsystem error");
     let window = video_subsystem
-        .window("pixel demo", DIMENSIONS.0, DIMENSIONS.1)
+        .window("pixel demo", DIMENSIONS.width, DIMENSIONS.height)
         .position_centered()
         .opengl()
         .build()
