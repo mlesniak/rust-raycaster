@@ -1,12 +1,22 @@
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::libc::rand;
+use sdl2::pixels::Color;
+use sdl2::rect::Point;
 use sdl2::render::{Texture, TextureCreator, WindowCanvas};
 use sdl2::video::WindowContext;
 use sdl2::*;
 
+struct Dimension {
+    width: u32,
+    height: u32,
+}
+
 #[cfg(debug_assertions)]
-const DIMENSIONS: (u32, u32) = (640, 360);
+const DIMENSIONS: Dimension = Dimension {
+    width: 640,
+    height: 480,
+};
 
 #[cfg(not(debug_assertions))]
 const DIMENSIONS: (u32, u32) = (1920, 1080);
@@ -15,7 +25,7 @@ fn main() -> Result<(), String> {
     let sdl_context = init().expect("General SDL error");
     let video_subsystem = sdl_context.video().expect("Video subsystem error");
     let window = video_subsystem
-        .window("pixel demo", DIMENSIONS.0, DIMENSIONS.1)
+        .window("pixel demo", DIMENSIONS.width, DIMENSIONS.height)
         .position_centered()
         .opengl()
         .build()
@@ -37,29 +47,19 @@ fn graphic_loop(
     mut event_pump: &mut EventPump,
     mut canvas: &mut WindowCanvas,
 ) -> Result<(), String> {
-    let texture_creator = canvas.texture_creator();
-    let mut tx = texture_creator
-        .create_texture_streaming(None, DIMENSIONS.0, DIMENSIONS.1)
-        .unwrap();
-    let mut pixels: Vec<u8> = vec![0; (DIMENSIONS.0 * DIMENSIONS.1 * 4) as usize];
-
-    let l = pixels.len();
     loop {
         if event_handling(&mut event_pump) {
             break;
         }
 
-        tx.update(
-            None,
-            pixels.as_slice(),
-            (DIMENSIONS.0 as usize * 4) as usize,
-        )
-        .expect("Copying pixels to GPU texture did not work");
+        canvas.set_draw_color(Color::BLACK);
+        canvas.clear();
 
-        // Prevent mutable warning for the time being.
-        pixels[(rand::random::<usize>()) % l] = 255;
+        canvas.set_draw_color(Color::YELLOW);
+        let p1 = Point::new(rand::random::<i32>() % 600, rand::random::<i32>() % 600);
+        let p2 = Point::new(rand::random::<i32>() % 600, rand::random::<i32>() % 600);
+        canvas.draw_line(p1, p2)?;
 
-        canvas.copy(&tx, None, None)?;
         canvas.present();
     }
 
