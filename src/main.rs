@@ -22,6 +22,7 @@ const DIMENSIONS: Dimension = Dimension {
 const DIMENSIONS: (u32, u32) = (1920, 1080);
 
 fn main() -> Result<(), String> {
+    // Gather all relevant objects from the SDL context.
     let sdl_context = init().expect("General SDL error");
     let video_subsystem = sdl_context.video().expect("Video subsystem error");
     let window = video_subsystem
@@ -38,12 +39,12 @@ fn main() -> Result<(), String> {
         .expect("Canvas subsystem error");
     let mut event_pump = sdl_context.event_pump().expect("Event Pump error");
 
-    graphic_loop(&mut event_pump, &mut canvas)?;
+    system_loop(&mut event_pump, &mut canvas)?;
 
     Ok(())
 }
 
-fn graphic_loop(
+fn system_loop(
     mut event_pump: &mut EventPump,
     mut canvas: &mut WindowCanvas,
 ) -> Result<(), String> {
