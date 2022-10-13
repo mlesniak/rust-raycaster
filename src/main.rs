@@ -1,4 +1,5 @@
 mod config;
+mod raycaster;
 mod system_loop;
 
 use crate::config::CONFIG;
