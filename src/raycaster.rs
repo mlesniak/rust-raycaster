@@ -30,8 +30,6 @@ impl Renderer for Raycaster {
         return true
     }
 
-    // TODO(mlesniak) draw is a bad name, maybe split between update and draw
-    //                later on...?
     fn draw(&mut self, canvas: &mut WindowCanvas) -> Result<(), String> {
         canvas.set_draw_color(self.color);
 
@@ -40,10 +38,6 @@ impl Renderer for Raycaster {
         let precision = 64.0;
 
         for x in 0..CONFIG.width {
-            // let p1 = Point::new(x, rand::random::<i32>() % CONFIG.height);
-            // let p2 = Point::new(x, rand::random::<i32>() % CONFIG.height);
-            // canvas.draw_line(p1, p2)?;
-
             // TODO(mlesniak) Move into data structure
             let mut ray_x = self.player.x;
             let mut ray_y = self.player.y;
