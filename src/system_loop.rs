@@ -38,7 +38,7 @@ fn wait(now: Instant) {
     if delta > 0 {
         std::thread::sleep(Duration::new(0, delta as u32 * 1_000 * 1_000));
     } else {
-        println!("Unable to achieve FPS: missed on {}ms", delta.abs());
+        println!("Unable to achieve FPS: missed by {}ms", delta.abs());
     }
 }
 
