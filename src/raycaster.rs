@@ -77,19 +77,19 @@ impl Renderer for Raycaster {
             let half_height = CONFIG.height as f32 / 2.0;
             let wall_height = half_height / dist;
 
-            canvas.set_draw_color(Color::RED);
+            canvas.set_draw_color(Color::RGB(30, 30, 30));
             canvas.draw_line(
                 Point::new(x, 0),
                 Point::new(x, (half_height - wall_height) as i32),
             )?;
 
-            canvas.set_draw_color(Color::GREEN);
+            canvas.set_draw_color(Color::RGB(100, 100, 100));
             canvas.draw_line(
                 Point::new(x, (half_height - wall_height) as i32),
                 Point::new(x, (half_height + wall_height) as i32),
             )?;
 
-            canvas.set_draw_color(Color::BLUE);
+            canvas.set_draw_color(Color::GRAY);
             canvas.draw_line(
                 Point::new(x, (half_height + wall_height) as i32),
                 Point::new(x, CONFIG.height),
