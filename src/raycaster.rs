@@ -96,6 +96,8 @@ impl Renderer for Raycaster {
         let player_speed = 0.5;
         let player_rotation = 5.0;
 
+        // TODO(mlesniak) collect event keys and act until pressed up
+
         for event in events.iter() {
             match event {
                 Event::Quit { .. }
