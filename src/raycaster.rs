@@ -7,10 +7,10 @@ use sdl2::rect::Point;
 use sdl2::render::WindowCanvas;
 use crate::system_loop::Renderer;
 
+// TODO(mlesniak) Generator function
 pub struct Raycaster {
-    pub color: Color,
-    map: Vec<Vec<i32>>,
-    player: Player,
+    pub map: Vec<Vec<i32>>,
+    pub player: Player,
 }
 
 // TODO(mlesniak) Trait
@@ -31,8 +31,6 @@ impl Renderer for Raycaster {
     }
 
     fn draw(&mut self, canvas: &mut WindowCanvas) -> Result<(), String> {
-        canvas.set_draw_color(self.color);
-
         let incr_angle = CONFIG.fov / CONFIG.width as f32;
         let mut ray_angle = self.player.angle - CONFIG.fov / 2.0;
         let precision = 64.0;
@@ -82,10 +80,10 @@ impl Renderer for Raycaster {
     }
 }
 
-struct Player {
-    x: f32,
-    y: f32,
-    angle: f32,
+pub struct Player {
+    pub x: f32,
+    pub y: f32,
+    pub angle: f32,
 }
 
 // struct Ray {
@@ -95,27 +93,5 @@ struct Player {
 // }
 
 impl Raycaster {
-    pub fn new(color: Color) -> Raycaster {
-        Raycaster {
-            color,
-            map: vec![
-                vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                vec![1, 0, 0, 1, 1, 0, 1, 0, 0, 1],
-                vec![1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-                vec![1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-                vec![1, 0, 0, 1, 0, 1, 1, 0, 0, 1],
-                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            ],
-            player: Player {
-                x: 2.0,
-                y: 2.0,
-                angle: 90.0,
-            },
-        }
-    }
 
 }

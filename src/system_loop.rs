@@ -6,27 +6,23 @@ use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;
 
 use crate::config::CONFIG;
-use crate::raycaster::Raycaster;
 
 pub trait Renderer {
     fn update(&self, events: Vec<Event>) -> bool;
     fn draw(&mut self, canvas: &mut WindowCanvas) -> Result<(), String>;
 }
 
-// TODO(mlesniak) Add Trait implementation to parameters
-pub fn run(mut event_pump: &mut EventPump, canvas: &mut WindowCanvas) -> Result<(), String> {
-    let mut raycaster: Raycaster = Raycaster::new(Color::GREEN);
-
+pub fn run(renderer: &mut dyn Renderer, event_pump: &mut EventPump, canvas: &mut WindowCanvas) -> Result<(), String> {
     loop {
         let now = Instant::now();
-        let events = collect_events(&mut event_pump);
-        if !raycaster.update(events) {
+        let events = event_pump.poll_iter().collect();
+        if !renderer.update(events) {
            break;
         }
 
         canvas.set_draw_color(Color::BLACK);
         canvas.clear();
-        raycaster.draw(canvas)?;
+        renderer.draw(canvas)?;
         canvas.present();
 
         wait(now)
@@ -47,21 +43,3 @@ fn wait(now: Instant) {
     }
 }
 
-fn collect_events(event_pump: &mut EventPump) -> Vec<Event> {
-    let mut events = vec![];
-
-    for event in event_pump.poll_iter() {
-        events.push(event);
-        //
-        // match event {
-        //     Event::Quit { .. }
-        //     | Event::KeyDown {
-        //         keycode: Some(Keycode::Escape),
-        //         ..
-        //     } => return events,
-        //     _ => {}
-        // }
-    }
-
-    events
-}
