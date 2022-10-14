@@ -16,11 +16,11 @@ struct Player {
     angle: f32,
 }
 
-struct Ray {
-    x: f32,
-    y: f32,
-    angle: f32,
-}
+// struct Ray {
+//     x: f32,
+//     y: f32,
+//     angle: f32,
+// }
 
 impl Raycaster {
     pub fn new(color: Color) -> Raycaster {

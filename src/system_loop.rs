@@ -1,16 +1,15 @@
-use crate::config::CONFIG;
-use crate::raycaster::Raycaster;
-use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
-use sdl2::libc::{rand, sleep};
-use sdl2::pixels::Color;
-use sdl2::rect::Point;
-use sdl2::render::{Texture, TextureCreator, WindowCanvas};
-use sdl2::video::WindowContext;
-use sdl2::*;
 use std::time::{Duration, Instant};
 
-pub fn run(mut event_pump: &mut EventPump, mut canvas: &mut WindowCanvas) -> Result<(), String> {
+use sdl2::*;
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
+use sdl2::pixels::Color;
+use sdl2::render::WindowCanvas;
+
+use crate::config::CONFIG;
+use crate::raycaster::Raycaster;
+
+pub fn run(mut event_pump: &mut EventPump, canvas: &mut WindowCanvas) -> Result<(), String> {
     let mut raycaster: Raycaster = Raycaster::new(Color::GREEN);
 
     loop {
@@ -34,7 +33,7 @@ pub fn run(mut event_pump: &mut EventPump, mut canvas: &mut WindowCanvas) -> Res
 /// Adaptive waiting based on frame rate.
 fn wait(now: Instant) {
     let diff_ms = Instant::now().duration_since(now).as_millis();
-    let delta = (1_000 / CONFIG.fps - diff_ms as i32);
+    let delta = 1_000 / CONFIG.fps - diff_ms as i32;
     if delta > 0 {
         std::thread::sleep(Duration::new(0, delta as u32 * 1_000 * 1_000));
     } else {
