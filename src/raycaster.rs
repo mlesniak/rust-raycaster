@@ -78,7 +78,7 @@ impl Raycaster {
 }
 
 impl Renderer for Raycaster {
-    fn update(&self, events: Vec<Event>) -> bool {
+    fn update(&mut self, events: Vec<Event>) -> bool {
         for event in events.iter() {
             match event {
                 Event::Quit { .. }
@@ -86,6 +86,20 @@ impl Renderer for Raycaster {
                     keycode: Some(Keycode::Escape),
                     ..
                 } => return false,
+
+                Event::KeyDown {
+                    keycode: Some(Keycode::A),
+                    ..
+                } => {
+                    self.player.angle -= 5.0;
+                }
+                Event::KeyDown {
+                    keycode: Some(Keycode::D),
+                    ..
+                } => {
+                    self.player.angle += 5.0;
+                }
+
                 _ => {}
             }
         }
@@ -131,8 +145,6 @@ impl Renderer for Raycaster {
 
             ray_angle += incr_angle;
         }
-
-        self.player.angle += 2.5;
 
         Ok(())
     }

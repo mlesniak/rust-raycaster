@@ -8,7 +8,7 @@ use sdl2::*;
 use crate::config::CONFIG;
 
 pub trait Renderer {
-    fn update(&self, events: Vec<Event>) -> bool;
+    fn update(&mut self, events: Vec<Event>) -> bool;
     fn draw(&mut self, canvas: &mut WindowCanvas) -> Result<(), String>;
 }
 
@@ -35,7 +35,7 @@ pub fn run(
         if tick > CONFIG.fps {
             wait(now)
         }
-        tick +=1;
+        tick += 1;
     }
 
     Ok(())
