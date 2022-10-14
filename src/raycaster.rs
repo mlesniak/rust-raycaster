@@ -6,10 +6,14 @@ use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::Point as RectPoint;
 use sdl2::render::WindowCanvas;
+use std::collections::HashSet;
 
 pub struct Raycaster {
     pub map: Vec<Vec<i32>>,
     pub player: Player,
+
+    // Internal state.
+    pressed_keys: HashSet<Keycode>,
 }
 
 impl Ray {
@@ -87,16 +91,15 @@ impl Raycaster {
                 pos: Point { x: 2.0, y: 2.0 },
                 angle: 90.0,
             },
+            pressed_keys: HashSet::new(),
         }
     }
 }
 
 impl Renderer for Raycaster {
     fn update(&mut self, events: Vec<Event>) -> bool {
-        let player_speed = 0.5;
-        let player_rotation = 5.0;
-
-        // TODO(mlesniak) collect event keys and act until pressed up
+        let player_speed = 0.1;
+        let player_rotation = 2.5;
 
         for event in events.iter() {
             match event {
@@ -107,21 +110,29 @@ impl Renderer for Raycaster {
                 } => return false,
 
                 Event::KeyDown {
-                    keycode: Some(Keycode::A),
-                    ..
+                    keycode: Some(key), ..
                 } => {
+                    self.pressed_keys.insert(*key);
+                }
+                Event::KeyUp {
+                    keycode: Some(key), ..
+                } => {
+                    self.pressed_keys.remove(key);
+                }
+
+                _ => {}
+            }
+        }
+
+        for keycode in self.pressed_keys.clone().into_iter() {
+            match keycode {
+                Keycode::A => {
                     self.player.angle -= player_rotation;
                 }
-                Event::KeyDown {
-                    keycode: Some(Keycode::D),
-                    ..
-                } => {
+                Keycode::D => {
                     self.player.angle += player_rotation;
                 }
-                Event::KeyDown {
-                    keycode: Some(Keycode::W),
-                    ..
-                } => {
+                Keycode::W => {
                     let dx = deg_to_rad(self.player.angle).cos() * player_speed;
                     let dy = deg_to_rad(self.player.angle).sin() * player_speed;
                     let np = self.player.pos.add(Point { x: dx, y: dy });
@@ -130,10 +141,7 @@ impl Renderer for Raycaster {
                         self.player.pos = np;
                     }
                 }
-                Event::KeyDown {
-                    keycode: Some(Keycode::S),
-                    ..
-                } => {
+                Keycode::S => {
                     let dx = deg_to_rad(self.player.angle).cos() * player_speed;
                     let dy = deg_to_rad(self.player.angle).sin() * player_speed;
                     let np = self.player.pos.sub(Point { x: dx, y: dy });
