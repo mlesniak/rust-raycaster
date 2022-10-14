@@ -5,6 +5,7 @@ use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
 use sdl2::render::WindowCanvas;
+use crate::system_loop::Renderer;
 
 pub struct Raycaster {
     pub color: Color,
@@ -13,8 +14,8 @@ pub struct Raycaster {
 }
 
 // TODO(mlesniak) Trait
-impl Raycaster {
-    pub fn update(&self, events: Vec<Event>) -> bool {
+impl Renderer for Raycaster {
+    fn update(&self, events: Vec<Event>) -> bool {
         for event in events.iter() {
             match event {
                 Event::Quit { .. }
@@ -28,47 +29,10 @@ impl Raycaster {
 
         return true
     }
-}
-
-struct Player {
-    x: f32,
-    y: f32,
-    angle: f32,
-}
-
-// struct Ray {
-//     x: f32,
-//     y: f32,
-//     angle: f32,
-// }
-
-impl Raycaster {
-    pub fn new(color: Color) -> Raycaster {
-        Raycaster {
-            color,
-            map: vec![
-                vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                vec![1, 0, 0, 1, 1, 0, 1, 0, 0, 1],
-                vec![1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-                vec![1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-                vec![1, 0, 0, 1, 0, 1, 1, 0, 0, 1],
-                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            ],
-            player: Player {
-                x: 2.0,
-                y: 2.0,
-                angle: 90.0,
-            },
-        }
-    }
 
     // TODO(mlesniak) draw is a bad name, maybe split between update and draw
     //                later on...?
-    pub fn draw(&mut self, canvas: &mut WindowCanvas) -> Result<(), String> {
+    fn draw(&mut self, canvas: &mut WindowCanvas) -> Result<(), String> {
         canvas.set_draw_color(self.color);
 
         let incr_angle = CONFIG.fov / CONFIG.width as f32;
@@ -122,4 +86,42 @@ impl Raycaster {
 
         Ok(())
     }
+}
+
+struct Player {
+    x: f32,
+    y: f32,
+    angle: f32,
+}
+
+// struct Ray {
+//     x: f32,
+//     y: f32,
+//     angle: f32,
+// }
+
+impl Raycaster {
+    pub fn new(color: Color) -> Raycaster {
+        Raycaster {
+            color,
+            map: vec![
+                vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                vec![1, 0, 0, 1, 1, 0, 1, 0, 0, 1],
+                vec![1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+                vec![1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+                vec![1, 0, 0, 1, 0, 1, 1, 0, 0, 1],
+                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            ],
+            player: Player {
+                x: 2.0,
+                y: 2.0,
+                angle: 90.0,
+            },
+        }
+    }
+
 }

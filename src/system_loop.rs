@@ -2,12 +2,16 @@ use std::time::{Duration, Instant};
 
 use sdl2::*;
 use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;
 
 use crate::config::CONFIG;
 use crate::raycaster::Raycaster;
+
+pub trait Renderer {
+    fn update(&self, events: Vec<Event>) -> bool;
+    fn draw(&mut self, canvas: &mut WindowCanvas) -> Result<(), String>;
+}
 
 // TODO(mlesniak) Add Trait implementation to parameters
 pub fn run(mut event_pump: &mut EventPump, canvas: &mut WindowCanvas) -> Result<(), String> {
