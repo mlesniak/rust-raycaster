@@ -1,9 +1,9 @@
 use std::time::{Duration, Instant};
 
-use sdl2::*;
 use sdl2::event::Event;
 use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;
+use sdl2::*;
 
 use crate::config::CONFIG;
 
@@ -12,12 +12,17 @@ pub trait Renderer {
     fn draw(&mut self, canvas: &mut WindowCanvas) -> Result<(), String>;
 }
 
-pub fn run(renderer: &mut dyn Renderer, event_pump: &mut EventPump, canvas: &mut WindowCanvas) -> Result<(), String> {
+pub fn run(
+    renderer: &mut dyn Renderer,
+    event_pump: &mut EventPump,
+    canvas: &mut WindowCanvas,
+) -> Result<(), String> {
+    let mut tick = 0;
     loop {
         let now = Instant::now();
         let events = event_pump.poll_iter().collect();
         if !renderer.update(events) {
-           break;
+            break;
         }
 
         canvas.set_draw_color(Color::BLACK);
@@ -25,7 +30,12 @@ pub fn run(renderer: &mut dyn Renderer, event_pump: &mut EventPump, canvas: &mut
         renderer.draw(canvas)?;
         canvas.present();
 
-        wait(now)
+        // Wait until window is actually displayed
+        // before activating FPS toggling.
+        if tick > CONFIG.fps {
+            wait(now)
+        }
+        tick +=1;
     }
 
     Ok(())
@@ -38,8 +48,6 @@ fn wait(now: Instant) {
     if delta > 0 {
         std::thread::sleep(Duration::new(0, delta as u32 * 1_000 * 1_000));
     } else {
-        // TODO(mlesniak) Wait until program actually started.
         println!("Unable to achieve FPS: missed by {}ms", delta.abs());
     }
 }
-

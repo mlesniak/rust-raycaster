@@ -13,6 +13,30 @@ pub struct Raycaster {
     pub player: Player,
 }
 
+impl Raycaster {
+    pub fn new() -> Raycaster {
+        Raycaster {
+            map: vec![
+                vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                vec![1, 0, 0, 1, 1, 0, 1, 0, 0, 1],
+                vec![1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+                vec![1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+                vec![1, 0, 0, 1, 0, 1, 1, 0, 0, 1],
+                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            ],
+            player: Player {
+                x: 2.0,
+                y: 2.0,
+                angle: 90.0,
+            },
+        }
+    }
+}
+
 // TODO(mlesniak) Trait
 impl Renderer for Raycaster {
     fn update(&self, events: Vec<Event>) -> bool {
