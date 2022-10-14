@@ -1,4 +1,5 @@
 mod config;
+mod math;
 mod raycaster;
 mod system_loop;
 
