@@ -48,6 +48,12 @@ struct Point {
     y: f32,
 }
 
+impl Point {
+    fn dist(&self, p: &Point) -> f32 {
+        ((self.x - p.x).powi(2) + (self.y - p.y).powi(2)).sqrt()
+    }
+}
+
 impl Raycaster {
     pub fn new() -> Raycaster {
         Raycaster {
@@ -88,23 +94,21 @@ impl Renderer for Raycaster {
     }
 
     fn draw(&mut self, canvas: &mut WindowCanvas) -> Result<(), String> {
+        let half_height = CONFIG.height as f32 / 2.0;
         let incr_angle = CONFIG.fov / CONFIG.width as f32;
         let mut ray_angle = self.player.angle - CONFIG.fov / 2.0;
 
         for x in 0..CONFIG.width {
-            // TODO(mlesniak) Move into data structure
             let mut ray = Ray::new(self.player.pos.x, self.player.pos.y, ray_angle);
 
-            let mut wall = 0;
-            while wall == 0 {
+            let mut ray_content = 0;
+            while ray_content == 0 {
                 ray.advance();
                 let (x, y) = ray.floor();
-                wall = self.map[y][x];
+                ray_content = self.map[y][x];
             }
 
-            // TODO(mlesniak) can be computed in ray with original player
-            let dist = ((self.player.pos.x - ray.pos.x).powi(2) + (self.player.pos.y - ray.pos.y).powi(2)).sqrt();
-            let half_height = CONFIG.height as f32 / 2.0;
+            let dist = self.player.pos.dist(&ray.pos);
             let wall_height = half_height / dist;
 
             canvas.set_draw_color(Color::RGB(30, 30, 30));
