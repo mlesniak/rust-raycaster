@@ -18,4 +18,5 @@ pub const CONFIG: Config = Config {
     width: 1280,
     height: 960,
     fps: 60,
+    fov: 60.0,
 };

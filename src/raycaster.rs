@@ -98,6 +98,8 @@ impl Raycaster {
             ray_angle += incr_angle;
         }
 
+        self.player.angle += 2.5;
+
         Ok(())
     }
 }
