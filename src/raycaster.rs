@@ -1,5 +1,7 @@
 use crate::math::*;
 use crate::CONFIG;
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
 use sdl2::render::WindowCanvas;
@@ -8,6 +10,24 @@ pub struct Raycaster {
     pub color: Color,
     map: Vec<Vec<i32>>,
     player: Player,
+}
+
+// TODO(mlesniak) Trait
+impl Raycaster {
+    pub fn update(&self, events: Vec<Event>) -> bool {
+        for event in events.iter() {
+            match event {
+                Event::Quit { .. }
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Escape),
+                    ..
+                } => { return false }
+                _ => {}
+            }
+        }
+
+        return true
+    }
 }
 
 struct Player {

@@ -9,18 +9,19 @@ use sdl2::render::WindowCanvas;
 use crate::config::CONFIG;
 use crate::raycaster::Raycaster;
 
+// TODO(mlesniak) Add Trait implementation to parameters
 pub fn run(mut event_pump: &mut EventPump, canvas: &mut WindowCanvas) -> Result<(), String> {
     let mut raycaster: Raycaster = Raycaster::new(Color::GREEN);
 
     loop {
         let now = Instant::now();
-        if event_handling(&mut event_pump) {
-            break;
+        let events = collect_events(&mut event_pump);
+        if !raycaster.update(events) {
+           break;
         }
 
         canvas.set_draw_color(Color::BLACK);
         canvas.clear();
-
         raycaster.draw(canvas)?;
         canvas.present();
 
@@ -42,18 +43,21 @@ fn wait(now: Instant) {
     }
 }
 
-/// Return true if we shall quit.
-fn event_handling(event_pump: &mut EventPump) -> bool {
+fn collect_events(event_pump: &mut EventPump) -> Vec<Event> {
+    let mut events = vec![];
+
     for event in event_pump.poll_iter() {
-        match event {
-            Event::Quit { .. }
-            | Event::KeyDown {
-                keycode: Some(Keycode::Escape),
-                ..
-            } => return true,
-            _ => {}
-        }
+        events.push(event);
+        //
+        // match event {
+        //     Event::Quit { .. }
+        //     | Event::KeyDown {
+        //         keycode: Some(Keycode::Escape),
+        //         ..
+        //     } => return events,
+        //     _ => {}
+        // }
     }
 
-    false
+    events
 }
