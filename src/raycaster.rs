@@ -26,10 +26,6 @@ impl Ray {
         self.pos.x += self.dx;
         self.pos.y += self.dy;
     }
-
-    fn floor(&self) -> (usize, usize) {
-        (self.pos.x.floor() as usize, self.pos.y.floor() as usize)
-    }
 }
 
 pub struct Player {
@@ -51,6 +47,24 @@ struct Point {
 impl Point {
     fn dist(&self, p: &Point) -> f32 {
         ((self.x - p.x).powi(2) + (self.y - p.y).powi(2)).sqrt()
+    }
+
+    fn add(&self, p: Point) -> Point {
+        Point {
+            x: self.x + p.x,
+            y: self.y + p.y,
+        }
+    }
+
+    fn sub(&self, p: Point) -> Point {
+        Point {
+            x: self.x - p.x,
+            y: self.y - p.y,
+        }
+    }
+
+    fn floor(&self) -> (usize, usize) {
+        (self.x.floor() as usize, self.y.floor() as usize)
     }
 }
 
@@ -79,6 +93,9 @@ impl Raycaster {
 
 impl Renderer for Raycaster {
     fn update(&mut self, events: Vec<Event>) -> bool {
+        let player_speed = 0.5;
+        let player_rotation = 5.0;
+
         for event in events.iter() {
             match event {
                 Event::Quit { .. }
@@ -91,13 +108,37 @@ impl Renderer for Raycaster {
                     keycode: Some(Keycode::A),
                     ..
                 } => {
-                    self.player.angle -= 5.0;
+                    self.player.angle -= player_rotation;
                 }
                 Event::KeyDown {
                     keycode: Some(Keycode::D),
                     ..
                 } => {
-                    self.player.angle += 5.0;
+                    self.player.angle += player_rotation;
+                }
+                Event::KeyDown {
+                    keycode: Some(Keycode::W),
+                    ..
+                } => {
+                    let dx = deg_to_rad(self.player.angle).cos() * player_speed;
+                    let dy = deg_to_rad(self.player.angle).sin() * player_speed;
+                    let np = self.player.pos.add(Point { x: dx, y: dy });
+                    let (x, y) = np.floor();
+                    if self.map[y][x] == 0 {
+                        self.player.pos = np;
+                    }
+                }
+                Event::KeyDown {
+                    keycode: Some(Keycode::S),
+                    ..
+                } => {
+                    let dx = deg_to_rad(self.player.angle).cos() * player_speed;
+                    let dy = deg_to_rad(self.player.angle).sin() * player_speed;
+                    let np = self.player.pos.sub(Point { x: dx, y: dy });
+                    let (x, y) = np.floor();
+                    if self.map[y][x] == 0 {
+                        self.player.pos = np;
+                    }
                 }
 
                 _ => {}
@@ -118,7 +159,7 @@ impl Renderer for Raycaster {
             let mut ray_content = 0;
             while ray_content == 0 {
                 ray.advance();
-                let (x, y) = ray.floor();
+                let (x, y) = ray.pos.floor();
                 ray_content = self.map[y][x];
             }
 
