@@ -1,6 +1,6 @@
 use crate::math::*;
 use crate::system_loop::Renderer;
-use crate::{CONFIG, utils};
+use crate::{utils, CONFIG};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
@@ -69,6 +69,33 @@ impl Point {
 
     fn floor(&self) -> (usize, usize) {
         (self.x.floor() as usize, self.y.floor() as usize)
+    }
+}
+
+struct Texture {
+    width: i32,
+    height: i32,
+    map: Vec<Vec<i32>>,
+    colors: Vec<Color>,
+}
+
+// Until we load it from a file
+#[inline]
+fn texture() -> Texture {
+    Texture {
+        width: 8,
+        height: 8,
+        map: vec![
+            vec![1, 1, 1, 1, 1, 1, 1, 1],
+            vec![0, 0, 0, 1, 0, 0, 0, 1],
+            vec![1, 1, 1, 1, 1, 1, 1, 1],
+            vec![0, 1, 0, 0, 0, 1, 0, 0],
+            vec![1, 1, 1, 1, 1, 1, 1, 1],
+            vec![0, 0, 0, 1, 0, 0, 0, 1],
+            vec![1, 1, 1, 1, 1, 1, 1, 1],
+            vec![0, 1, 0, 0, 0, 1, 0, 0],
+        ],
+        colors: vec![Color::RGB(40, 40, 40), Color::RGB(60, 60, 60)],
     }
 }
 
@@ -177,17 +204,17 @@ impl Renderer for Raycaster {
             let dist = hypothenuse * deg_to_rad(ray_angle - self.player.angle).cos();
             let wall_height = half_height / dist;
 
+            // In-memory texture mapping
+            let tx = texture();
+            let tx_posx = ((tx.width as f32 * (ray.pos.x + ray.pos.y)).floor() as i32) % tx.width;
+
             canvas.set_draw_color(Color::RGB(30, 30, 30));
             canvas.draw_line(
                 RectPoint::new(x, 0),
                 RectPoint::new(x, (half_height - wall_height) as i32),
             )?;
 
-            canvas.set_draw_color(Color::RGB(100, 100, 100));
-            canvas.draw_line(
-                RectPoint::new(x, (half_height - wall_height) as i32),
-                RectPoint::new(x, (half_height + wall_height) as i32),
-            )?;
+            self.draw_texture_strip(canvas, x, wall_height, tx_posx, tx);
 
             canvas.set_draw_color(Color::GRAY);
             canvas.draw_line(
@@ -199,5 +226,32 @@ impl Renderer for Raycaster {
         }
 
         Ok(())
+    }
+}
+
+impl Raycaster {
+    fn draw_texture_strip(
+        &self,
+        canvas: &mut WindowCanvas,
+        x: i32,
+        wall_height: f32,
+        tx_posx: i32,
+        tx: Texture,
+    ) {
+        let y_incr = wall_height * 2.0 / tx.height as f32;
+        let mut y = CONFIG.height as f32 / 2.0 - wall_height;
+
+        for i in 0..tx.height as usize {
+            let tx_val = tx.map[i][tx_posx as usize] as usize;
+            canvas.set_draw_color(tx.colors[tx_val]);
+            canvas
+                .draw_line(
+                    sdl2::rect::Point::new(x, y as i32),
+                    sdl2::rect::Point::new(x, (y + y_incr) as i32),
+                )
+                .unwrap();
+
+            y += y_incr;
+        }
     }
 }
