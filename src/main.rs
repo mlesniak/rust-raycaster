@@ -2,11 +2,13 @@ mod config;
 mod math;
 mod raycaster;
 mod system_loop;
+mod utils;
 
 use crate::config::CONFIG;
 use crate::raycaster::Raycaster;
 use sdl2::render::WindowCanvas;
 use sdl2::*;
+use std::fs;
 
 fn main() -> Result<(), String> {
     let mut renderer = Raycaster::new();

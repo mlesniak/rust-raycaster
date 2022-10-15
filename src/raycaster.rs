@@ -1,6 +1,6 @@
 use crate::math::*;
 use crate::system_loop::Renderer;
-use crate::CONFIG;
+use crate::{CONFIG, utils};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
@@ -75,18 +75,7 @@ impl Point {
 impl Raycaster {
     pub fn new() -> Raycaster {
         Raycaster {
-            map: vec![
-                vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                vec![1, 0, 0, 1, 1, 0, 1, 0, 0, 1],
-                vec![1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-                vec![1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-                vec![1, 0, 0, 1, 0, 1, 1, 0, 0, 1],
-                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                vec![1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            ],
+            map: utils::read_map(),
             player: Player {
                 pos: Point { x: 2.0, y: 2.0 },
                 angle: 90.0,
