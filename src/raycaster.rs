@@ -173,7 +173,8 @@ impl Renderer for Raycaster {
                 ray_content = self.map[y][x];
             }
 
-            let dist = self.player.pos.dist(&ray.pos);
+            let hypothenuse = self.player.pos.dist(&ray.pos);
+            let dist = hypothenuse * deg_to_rad(ray_angle - self.player.angle).cos();
             let wall_height = half_height / dist;
 
             canvas.set_draw_color(Color::RGB(30, 30, 30));
