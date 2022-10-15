@@ -45,7 +45,7 @@ pub fn run(
 fn wait(now: Instant) {
     let diff_ms = Instant::now().duration_since(now).as_millis();
     let delta = 1_000 / CONFIG.fps - diff_ms as i32;
-    if delta > 0 {
+    if delta >= 0 {
         std::thread::sleep(Duration::new(0, delta as u32 * 1_000 * 1_000));
     } else {
         println!("Unable to achieve FPS: missed by {}ms", delta.abs());
