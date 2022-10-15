@@ -89,6 +89,7 @@ impl Renderer for Raycaster {
     fn update(&mut self, events: Vec<Event>) -> bool {
         let player_speed = 0.1;
         let player_rotation = 2.5;
+        let player_radius = 10.0;
 
         for event in events.iter() {
             match event {
@@ -125,18 +126,28 @@ impl Renderer for Raycaster {
                     let dx = deg_to_rad(self.player.angle).cos() * player_speed;
                     let dy = deg_to_rad(self.player.angle).sin() * player_speed;
                     let np = self.player.pos.add(Point { x: dx, y: dy });
+                    let cx = (np.x + dx * player_radius).floor() as usize;
+                    let cy = (np.y + dy * player_radius).floor() as usize;
                     let (x, y) = np.floor();
-                    if self.map[y][x] == 0 {
-                        self.player.pos = np;
+                    if self.map[cy][x] == 0 {
+                        self.player.pos.y = np.y;
+                    }
+                    if self.map[y][cx] == 0 {
+                        self.player.pos.x = np.x;
                     }
                 }
                 Keycode::S => {
                     let dx = deg_to_rad(self.player.angle).cos() * player_speed;
                     let dy = deg_to_rad(self.player.angle).sin() * player_speed;
                     let np = self.player.pos.sub(Point { x: dx, y: dy });
+                    let cx = (np.x - dx * player_radius).floor() as usize;
+                    let cy = (np.y - dy * player_radius).floor() as usize;
                     let (x, y) = np.floor();
-                    if self.map[y][x] == 0 {
-                        self.player.pos = np;
+                    if self.map[cy][x] == 0 {
+                        self.player.pos.y = np.y;
+                    }
+                    if self.map[y][cx] == 0 {
+                        self.player.pos.x = np.x;
                     }
                 }
 
