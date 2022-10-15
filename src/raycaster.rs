@@ -82,21 +82,38 @@ struct Texture {
 // Until we load it from a file
 #[inline]
 fn textures() -> Vec<Texture> {
-    vec![Texture {
-        width: 8,
-        height: 8,
-        map: vec![
-            vec![1, 1, 1, 1, 1, 1, 1, 1],
-            vec![0, 0, 0, 1, 0, 0, 0, 1],
-            vec![1, 1, 1, 1, 1, 1, 1, 1],
-            vec![0, 1, 0, 0, 0, 1, 0, 0],
-            vec![1, 1, 1, 1, 1, 1, 1, 1],
-            vec![0, 0, 0, 1, 0, 0, 0, 1],
-            vec![1, 1, 1, 1, 1, 1, 1, 1],
-            vec![0, 1, 0, 0, 0, 1, 0, 0],
-        ],
-        colors: vec![Color::RGB(40, 40, 40), Color::RGB(60, 60, 60)],
-    }]
+    vec![
+        Texture {
+            width: 8,
+            height: 8,
+            map: vec![
+                vec![1, 1, 1, 1, 1, 1, 1, 1],
+                vec![0, 0, 0, 1, 0, 0, 0, 1],
+                vec![1, 1, 1, 1, 1, 1, 1, 1],
+                vec![0, 1, 0, 0, 0, 1, 0, 0],
+                vec![1, 1, 1, 1, 1, 1, 1, 1],
+                vec![0, 0, 0, 1, 0, 0, 0, 1],
+                vec![1, 1, 1, 1, 1, 1, 1, 1],
+                vec![0, 1, 0, 0, 0, 1, 0, 0],
+            ],
+            colors: vec![Color::RGB(40, 40, 40), Color::RGB(60, 60, 60)],
+        },
+        Texture {
+            width: 8,
+            height: 8,
+            map: vec![
+                vec![1, 1, 1, 1, 1, 1, 1, 1],
+                vec![1, 1, 1, 1, 1, 1, 1, 1],
+                vec![1, 1, 1, 1, 1, 1, 1, 1],
+                vec![1, 1, 1, 1, 1, 1, 1, 1],
+                vec![1, 1, 1, 1, 1, 1, 1, 1],
+                vec![1, 1, 1, 1, 1, 1, 1, 1],
+                vec![1, 1, 1, 1, 1, 1, 1, 1],
+                vec![1, 1, 1, 1, 1, 1, 1, 1],
+            ],
+            colors: vec![Color::RGB(40, 40, 40), Color::RGB(255, 0, 0)],
+        },
+    ]
 }
 
 impl Raycaster {
