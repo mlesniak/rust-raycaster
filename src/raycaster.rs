@@ -81,8 +81,8 @@ struct Texture {
 
 // Until we load it from a file
 #[inline]
-fn texture() -> Texture {
-    Texture {
+fn textures() -> Vec<Texture> {
+    vec![Texture {
         width: 8,
         height: 8,
         map: vec![
@@ -96,7 +96,7 @@ fn texture() -> Texture {
             vec![0, 1, 0, 0, 0, 1, 0, 0],
         ],
         colors: vec![Color::RGB(40, 40, 40), Color::RGB(60, 60, 60)],
-    }
+    }]
 }
 
 impl Raycaster {
@@ -205,7 +205,7 @@ impl Renderer for Raycaster {
             let wall_height = half_height / dist;
 
             // In-memory texture mapping
-            let tx = texture();
+            let tx = &textures()[(ray_content - 1) as usize];
             let tx_posx = ((tx.width as f32 * (ray.pos.x + ray.pos.y)).floor() as i32) % tx.width;
 
             canvas.set_draw_color(Color::RGB(30, 30, 30));
@@ -214,7 +214,7 @@ impl Renderer for Raycaster {
                 RectPoint::new(x, (half_height - wall_height) as i32),
             )?;
 
-            self.draw_texture_strip(canvas, x, wall_height, tx_posx, tx);
+            self.draw_texture_strip(canvas, x, wall_height, tx_posx, &tx);
 
             canvas.set_draw_color(Color::GRAY);
             canvas.draw_line(
@@ -236,7 +236,7 @@ impl Raycaster {
         x: i32,
         wall_height: f32,
         tx_posx: i32,
-        tx: Texture,
+        tx: &Texture,
     ) {
         let y_incr = wall_height * 2.0 / tx.height as f32;
         let mut y = CONFIG.height as f32 / 2.0 - wall_height;
