@@ -144,7 +144,7 @@ impl Renderer for Raycaster {
             }
         }
 
-        return true;
+        true
     }
 
     fn draw(&mut self, canvas: &mut WindowCanvas) -> Result<(), String> {
