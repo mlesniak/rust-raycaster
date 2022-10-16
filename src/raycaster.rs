@@ -167,6 +167,7 @@ fn textures() -> Vec<Texture> {
             colors: vec![Color::RGB(40, 40, 40), Color::RGB(255, 0, 0)],
         },
         Texture::load("texture.png").unwrap(),
+        Texture::load("suki.png").unwrap(),
     ]
 }
 
