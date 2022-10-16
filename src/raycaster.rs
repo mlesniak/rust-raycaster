@@ -2,15 +2,20 @@ use crate::math::*;
 use crate::system_loop::Renderer;
 use crate::{utils, CONFIG};
 use sdl2::event::Event;
+use sdl2::image;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::Point as RectPoint;
 use sdl2::render::WindowCanvas;
-use std::collections::HashSet;
+use sdl2::surface::Surface;
+use std::collections::{HashMap, HashSet};
 
 pub struct Raycaster {
     pub map: Vec<Vec<i32>>,
     pub player: Player,
+
+    // Cache loaded assets
+    textures: Vec<Texture>,
 
     // Internal state.
     pressed_keys: HashSet<Keycode>,
@@ -72,11 +77,59 @@ impl Point {
     }
 }
 
-struct Texture {
+#[derive(Debug)]
+pub struct Texture {
     width: i32,
     height: i32,
     map: Vec<Vec<i32>>,
     colors: Vec<Color>,
+}
+
+impl Texture {
+    pub fn load(filename: &str) -> Result<Texture, String> {
+        // TODO(mlesniak) Refactor this
+        let surface: Surface = image::LoadSurface::from_file(filename)?;
+
+        let mut counter = 0;
+        let mut colors: HashMap<Color, i32> = HashMap::new();
+
+        let mut map: Vec<Vec<i32>> = vec![];
+        let mut row: Vec<i32> = vec![];
+
+        surface.with_lock(|pixels| {
+            for i in (0..pixels.len()).step_by(3) {
+                if i != 0 && i as u32 % surface.width() == 0 {
+                    map.push(row.clone());
+                    row = vec![];
+                }
+                let color = Color::RGB(pixels[i], pixels[i + 1], pixels[i + 2]);
+                match colors.get(&color) {
+                    None => {
+                        row.push(counter);
+                        colors.insert(color, counter);
+                        counter += 1;
+                    }
+                    Some(idx) => {
+                        row.push(*idx);
+                    }
+                }
+            }
+        });
+        map.push(row.clone());
+
+        let mut indexed_colors: Vec<Color> = vec![Color::BLACK; colors.len()];
+        for color in colors.keys().into_iter() {
+            let idx = colors[color] as usize;
+            indexed_colors[idx] = *color;
+        }
+
+        Ok(Texture {
+            width: surface.width() as i32,
+            height: surface.height() as i32,
+            map,
+            colors: indexed_colors,
+        })
+    }
 }
 
 // Until we load it from a file
@@ -113,6 +166,7 @@ fn textures() -> Vec<Texture> {
             ],
             colors: vec![Color::RGB(40, 40, 40), Color::RGB(255, 0, 0)],
         },
+        Texture::load("texture.png").unwrap(),
     ]
 }
 
@@ -124,6 +178,7 @@ impl Raycaster {
                 pos: Point { x: 2.0, y: 2.0 },
                 angle: 90.0,
             },
+            textures: textures(),
             pressed_keys: HashSet::new(),
         }
     }
@@ -222,7 +277,7 @@ impl Renderer for Raycaster {
             let wall_height = half_height / dist;
 
             // In-memory texture mapping
-            let tx = &textures()[(ray_content - 1) as usize];
+            let tx = &self.textures[(ray_content - 1) as usize];
             let tx_posx = ((tx.width as f32 * (ray.pos.x + ray.pos.y)).floor() as i32) % tx.width;
 
             canvas.set_draw_color(Color::RGB(30, 30, 30));

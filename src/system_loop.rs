@@ -1,10 +1,11 @@
 use std::time::{Duration, Instant};
 
 use sdl2::event::Event;
-use sdl2::pixels::Color;
-use sdl2::render::WindowCanvas;
+use sdl2::pixels::{Color, PixelFormatEnum};
+use sdl2::render::{Texture, WindowCanvas};
 use sdl2::*;
 use sdl2::image::LoadTexture;
+use sdl2::surface::Surface;
 
 use crate::config::CONFIG;
 
@@ -20,9 +21,6 @@ pub fn run(
 ) -> Result<(), String> {
     let mut tick = 0;
 
-    let creator = canvas.texture_creator();
-    let tx = creator.load_texture("texture.png")?;
-
     loop {
         let now = Instant::now();
         let events = event_pump.poll_iter().collect();
@@ -32,9 +30,7 @@ pub fn run(
 
         canvas.set_draw_color(Color::BLACK);
         canvas.clear();
-        // TODO(mlesniak) Uncomment this again
-        // renderer.draw(canvas)?;
-        canvas.copy(&tx, None, None)?;
+        renderer.draw(canvas)?;
         canvas.present();
 
         // Wait until window is actually displayed

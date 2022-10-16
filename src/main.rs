@@ -6,7 +6,7 @@ mod utils;
 
 use crate::config::CONFIG;
 use crate::raycaster::Raycaster;
-use sdl2::render::WindowCanvas;
+use sdl2::render::{WindowCanvas};
 use sdl2::*;
 
 fn main() -> Result<(), String> {
