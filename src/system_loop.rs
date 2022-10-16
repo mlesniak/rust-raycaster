@@ -1,11 +1,9 @@
 use std::time::{Duration, Instant};
 
 use sdl2::event::Event;
-use sdl2::pixels::{Color, PixelFormatEnum};
-use sdl2::render::{Texture, WindowCanvas};
+use sdl2::pixels::Color;
+use sdl2::render::WindowCanvas;
 use sdl2::*;
-use sdl2::image::LoadTexture;
-use sdl2::surface::Surface;
 
 use crate::config::CONFIG;
 
