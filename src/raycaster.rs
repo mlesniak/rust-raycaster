@@ -115,10 +115,10 @@ impl Texture {
                 }
             }
         });
-        map.push(row.clone());
+        map.push(row);
 
         let mut indexed_colors: Vec<Color> = vec![Color::BLACK; colors.len()];
-        for color in colors.keys().into_iter() {
+        for color in colors.keys() {
             let idx = colors[color] as usize;
             indexed_colors[idx] = *color;
         }
@@ -287,7 +287,7 @@ impl Renderer for Raycaster {
                 RectPoint::new(x, (half_height - wall_height) as i32),
             )?;
 
-            self.draw_texture_strip(canvas, x, wall_height, tx_posx, &tx);
+            self.draw_texture_strip(canvas, x, wall_height, tx_posx, tx);
 
             canvas.set_draw_color(Color::GRAY);
             canvas.draw_line(
