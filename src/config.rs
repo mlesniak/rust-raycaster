@@ -9,7 +9,7 @@ pub struct Config {
 pub const CONFIG: Config = Config {
     width: 640,
     height: 480,
-    fps: 60,
+    fps: 30,
     fov: 60.0,
 };
 

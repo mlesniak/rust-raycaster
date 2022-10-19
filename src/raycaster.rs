@@ -91,7 +91,7 @@ impl Texture {
         // TODO(mlesniak) Refactor this
         let surface: Surface = image::LoadSurface::from_file(filename)?;
 
-        println!("{}/{}", surface.width(), surface.height());
+        println!("surface {}/{}", surface.width(), surface.height());
 
         let mut counter = 0;
         let mut colors: HashMap<Color, i32> = HashMap::new();
@@ -100,8 +100,10 @@ impl Texture {
         let mut row: Vec<i32> = vec![];
 
         surface.with_lock(|pixels| {
+            println!("{}", pixels.len());
             for i in (0..pixels.len()).step_by(3) {
-                if i != 0 && i as u32 % surface.width() == 0 {
+                if i != 0 && i as u32 % (surface.width() * 3) == 0 {
+                    println!("pushing row with len={}", row.len());
                     map.push(row.clone());
                     row = vec![];
                 }
@@ -118,6 +120,7 @@ impl Texture {
                 }
             }
         });
+        println!("pushing row with len={}", row.len());
         map.push(row);
 
         let mut indexed_colors: Vec<Color> = vec![Color::BLACK; colors.len()];
@@ -125,6 +128,8 @@ impl Texture {
             let idx = colors[color] as usize;
             indexed_colors[idx] = *color;
         }
+
+        println!("map {} / {}", map[0].len(), map.len());
 
         Ok(Texture {
             width: surface.width() as i32,
@@ -179,7 +184,6 @@ impl Raycaster {
         let background = Texture::load("background.png").unwrap();
 
         println!("{} / {}", background.width, background.height);
-        println!("{} / {}", background.map.len(), background.map[0].len());
 
         Raycaster {
             map: utils::read_map(),
@@ -196,8 +200,8 @@ impl Raycaster {
 
 impl Renderer for Raycaster {
     fn update(&mut self, events: Vec<Event>) -> bool {
-        let player_speed = 0.1;
-        let player_rotation = 2.5;
+        let player_speed = 0.2;
+        let player_rotation = 5.0;
         let player_radius = 10.0;
 
         for event in events.iter() {
@@ -313,15 +317,16 @@ impl Renderer for Raycaster {
 }
 
 impl Raycaster {
-    fn draw_background_strip(&self, canvas: &mut WindowCanvas, x: i32, y1: i32, y2: i32){
-        let start = self.player.angle as i32 + x;
-        let tx = (start % self.background.width) as usize;
+    fn draw_background_strip(&self, canvas: &mut WindowCanvas, x: i32, y1: i32, y2: i32) {
+        let start = x + self.player.angle as i32;
+        let tx = (start % self.background.width).abs() as usize;
 
         for y in y1..y2 {
             let ty = (y % self.background.height) as usize;
             let idx = self.background.map[ty][tx] as usize;
             let c = self.background.colors[idx];
             canvas.set_draw_color(c);
+            // TODO(mlesniak) draw_points
             canvas.draw_point(sdl2::rect::Point::new(x, y)).unwrap();
         }
     }
