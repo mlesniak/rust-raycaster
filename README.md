@@ -1,6 +1,8 @@
 # Overview
 
-Raycaster in Rust, i.e. "your own 3D engine" just using primite `SDL::Canvas::draw_line` functions and math (and currently easing my life for the blue background texture, see TODO below).
+Raycaster in Rust, i.e. "your own 3D engine" just using primitive `SDL::Canvas::draw_line` functions and math (and currently easing my life for the blue background texture, see TODO below). 
+
+Code is currently a mess since it's in active refactoring and development and I'm still learning Rust (and SDL2).
 
 ![Animation](animation.gif)
 
