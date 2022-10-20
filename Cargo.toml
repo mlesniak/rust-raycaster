@@ -11,4 +11,4 @@ tinyrand = "0.5.0"
 
 [dependencies.sdl2]
 version = "0.35"
-features = ["image"]
+features = ["image", "unsafe_textures"]

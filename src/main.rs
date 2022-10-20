@@ -10,7 +10,6 @@ use sdl2::render::{WindowCanvas};
 use sdl2::*;
 
 fn main() -> Result<(), String> {
-    let mut renderer = Raycaster::new();
 
     // Gather all relevant objects from the SDL context.
     let sdl_context = init().expect("General SDL error");
@@ -29,5 +28,7 @@ fn main() -> Result<(), String> {
         .expect("Canvas subsystem error");
     let mut event_pump = sdl_context.event_pump().expect("Event Pump error");
 
+    let mut texture_creator = canvas.texture_creator();
+    let mut renderer = Raycaster::new(&texture_creator);
     system_loop::run(&mut renderer, &mut event_pump, &mut canvas)
 }

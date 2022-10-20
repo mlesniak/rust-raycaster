@@ -3,11 +3,13 @@ use crate::system_loop::Renderer;
 use crate::{utils, CONFIG};
 use sdl2::event::Event;
 use sdl2::image;
+use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
-use sdl2::rect::Point as RectPoint;
-use sdl2::render::WindowCanvas;
+use sdl2::rect::{Point as RectPoint, Rect};
+use sdl2::render::{TextureCreator, WindowCanvas};
 use sdl2::surface::Surface;
+use sdl2::video::WindowContext;
 use std::collections::{HashMap, HashSet};
 
 pub struct Raycaster {
@@ -16,7 +18,7 @@ pub struct Raycaster {
 
     // Cache loaded assets
     textures: Vec<Texture>,
-    background: Texture,
+    background: sdl2::render::Texture,
 
     // Internal state.
     pressed_keys: HashSet<Keycode>,
@@ -91,8 +93,6 @@ impl Texture {
         // TODO(mlesniak) Refactor this
         let surface: Surface = image::LoadSurface::from_file(filename)?;
 
-        println!("surface {}/{}", surface.width(), surface.height());
-
         let mut counter = 0;
         let mut colors: HashMap<Color, i32> = HashMap::new();
 
@@ -100,10 +100,8 @@ impl Texture {
         let mut row: Vec<i32> = vec![];
 
         surface.with_lock(|pixels| {
-            println!("{}", pixels.len());
             for i in (0..pixels.len()).step_by(3) {
                 if i != 0 && i as u32 % (surface.width() * 3) == 0 {
-                    println!("pushing row with len={}", row.len());
                     map.push(row.clone());
                     row = vec![];
                 }
@@ -120,7 +118,6 @@ impl Texture {
                 }
             }
         });
-        println!("pushing row with len={}", row.len());
         map.push(row);
 
         let mut indexed_colors: Vec<Color> = vec![Color::BLACK; colors.len()];
@@ -128,8 +125,6 @@ impl Texture {
             let idx = colors[color] as usize;
             indexed_colors[idx] = *color;
         }
-
-        println!("map {} / {}", map[0].len(), map.len());
 
         Ok(Texture {
             width: surface.width() as i32,
@@ -180,19 +175,21 @@ fn load_textures() -> Vec<Texture> {
 }
 
 impl Raycaster {
-    pub fn new() -> Raycaster {
-        let background = Texture::load("background.png").unwrap();
+    pub fn new(texture_creator: &TextureCreator<WindowContext>) -> Raycaster {
+        // let background = Texture::load("background.png").unwrap();
+        // let surface: Surface = image::LoadSurface::from_file("background.png")?;
+        let bg = texture_creator.load_texture("background.png").unwrap();
 
-        println!("{} / {}", background.width, background.height);
+        // println!("{} / {}", background.width, background.height);
 
         Raycaster {
             map: utils::read_map(),
             player: Player {
                 pos: Point { x: 2.0, y: 2.0 },
-                angle: 90.0,
+                angle: 00.0,
             },
             textures: load_textures(),
-            background: background, // TODO(mlesniak) Error handling
+            background: bg,
             pressed_keys: HashSet::new(),
         }
     }
@@ -202,7 +199,7 @@ impl Renderer for Raycaster {
     fn update(&mut self, events: Vec<Event>) -> bool {
         let player_speed = 0.2;
         let player_rotation = 5.0;
-        let player_radius = 10.0;
+        let player_radius = 1.0;
 
         for event in events.iter() {
             match event {
@@ -272,9 +269,13 @@ impl Renderer for Raycaster {
     }
 
     fn draw(&mut self, canvas: &mut WindowCanvas) -> Result<(), String> {
+        // canvas.copy(&self.background, None, None).unwrap();
+        // Ok(())
+
         let half_height = CONFIG.height as f32 / 2.0;
         let incr_angle = CONFIG.fov / CONFIG.width as f32;
         let mut ray_angle = self.player.angle - CONFIG.fov / 2.0;
+        let query = self.background.query();
 
         for x in 0..CONFIG.width {
             let mut ray = Ray::new(self.player.pos.x, self.player.pos.y, ray_angle);
@@ -299,7 +300,24 @@ impl Renderer for Raycaster {
             //     RectPoint::new(x, 0),
             //     RectPoint::new(x, (half_height - wall_height) as i32),
             // )?;
-            self.draw_background_strip(canvas, x, 0, (half_height - wall_height) as i32);
+            // self.draw_background_strip(canvas, x, 0, (half_height - wall_height) as i32);
+            canvas
+                .copy(
+                    &self.background,
+                    Rect::new(
+                        (x + self.player.angle as i32).abs() % query.width as i32,
+                        0,
+                        1,
+                        (half_height - wall_height) as u32,
+                    ),
+                    Rect::new(
+                        x.abs() % query.width as i32,
+                        0,
+                        1,
+                        (half_height - wall_height) as u32,
+                    ),
+                )
+                .unwrap();
 
             self.draw_texture_strip(canvas, x, wall_height, tx_posx, tx);
 
@@ -317,19 +335,19 @@ impl Renderer for Raycaster {
 }
 
 impl Raycaster {
-    fn draw_background_strip(&self, canvas: &mut WindowCanvas, x: i32, y1: i32, y2: i32) {
-        let start = x + self.player.angle as i32;
-        let tx = (start % self.background.width).abs() as usize;
-
-        for y in y1..y2 {
-            let ty = (y % self.background.height) as usize;
-            let idx = self.background.map[ty][tx] as usize;
-            let c = self.background.colors[idx];
-            canvas.set_draw_color(c);
-            // TODO(mlesniak) draw_points
-            canvas.draw_point(sdl2::rect::Point::new(x, y)).unwrap();
-        }
-    }
+    // fn draw_background_strip(&self, canvas: &mut WindowCanvas, x: i32, y1: i32, y2: i32) {
+    //     let start = x + self.player.angle as i32;
+    //     let tx = (start % self.background.width).abs() as usize;
+    //
+    //     for y in y1..y2 {
+    //         let ty = (y % self.background.height) as usize;
+    //         let idx = self.background.map[ty][tx] as usize;
+    //         let c = self.background.colors[idx];
+    //         canvas.set_draw_color(c);
+    //         // TODO(mlesniak) draw_points
+    //         canvas.draw_point(sdl2::rect::Point::new(x, y)).unwrap();
+    //     }
+    // }
 
     fn draw_texture_strip(
         &self,
