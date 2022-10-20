@@ -197,8 +197,8 @@ impl Raycaster {
 
 impl Renderer for Raycaster {
     fn update(&mut self, events: Vec<Event>) -> bool {
-        let player_speed = 0.2;
-        let player_rotation = 5.0;
+        let player_speed = 0.1;
+        let player_rotation = 3.0;
         let player_radius = 1.0;
 
         for event in events.iter() {
