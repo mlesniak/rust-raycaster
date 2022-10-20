@@ -6,4 +6,5 @@ Raycaster in Rust.
 
 ## TODO
 
-[ ] Change from SDL image functions for background to pure pixel-based drawing functions. 
+[ ] Change from SDL image functions for background to pure pixel-based drawing functions.
+[ ] Clean up code :)
