@@ -30,17 +30,16 @@ impl Canvas {
     }
 
     pub fn draw_vertical_line(&mut self, x: i32, y1: i32, y2: i32, c1: u8, c2: u8, c3: u8) {
-        for y in y1..y2 {
+        let y1_clamped = y1.max(0);
+        let y2_clamped = y2.min(self.height as i32);
+
+        for y in y1_clamped..y2_clamped {
             self.set_pixel(x, y, c1, c2, c3)
         }
     }
 
     #[inline]
     pub fn set_pixel(&mut self, x: i32, y: i32, c1: u8, c2: u8, c3: u8) {
-        // self.pixels[(y * self.width as i32 * 3 + x) as usize] = c1;
-        // self.pixels[(y * self.width as i32 * 3 + x + 1) as usize] = c2;
-        // self.pixels[(y * self.width as i32 * 3 + x + 2) as usize] = c3;
-        // self.pixels[461760] = 255;
         self.pixels[((self.width as i32 * y + x) * 3) as usize] = c1;
         self.pixels[((self.width as i32 * y + x) * 3 + 1) as usize] = c2;
         self.pixels[((self.width as i32 * y + x) * 3 + 2) as usize] = c3;
@@ -74,6 +73,7 @@ pub fn run(
         // canvas.set_draw_color(Color::BLACK);
         // canvas.clear();
         // renderer.draw(canvas)?;
+
         renderer.draw(&mut c);
         pixel_surface.update(None, &c.pixels, (c.width * 3) as usize);
         canvas.copy(&pixel_surface, None, None)?;
