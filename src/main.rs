@@ -6,11 +6,11 @@ mod utils;
 
 use crate::config::CONFIG;
 use crate::raycaster::Raycaster;
-use sdl2::render::{WindowCanvas};
+use sdl2::pixels::PixelFormatEnum;
+use sdl2::render::WindowCanvas;
 use sdl2::*;
 
 fn main() -> Result<(), String> {
-
     // Gather all relevant objects from the SDL context.
     let sdl_context = init().expect("General SDL error");
     let video_subsystem = sdl_context.video().expect("Video subsystem error");
@@ -30,5 +30,6 @@ fn main() -> Result<(), String> {
 
     let mut texture_creator = canvas.texture_creator();
     let mut renderer = Raycaster::new(&texture_creator);
+
     system_loop::run(&mut renderer, &mut event_pump, &mut canvas)
 }

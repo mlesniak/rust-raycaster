@@ -1,5 +1,6 @@
+use std::cmp::min;
 use crate::math::*;
-use crate::system_loop::Renderer;
+use crate::system_loop::{Canvas, Renderer};
 use crate::{utils, CONFIG};
 use sdl2::event::Event;
 use sdl2::image;
@@ -268,12 +269,13 @@ impl Renderer for Raycaster {
         true
     }
 
-    fn draw(&mut self, canvas: &mut WindowCanvas) -> Result<(), String> {
+    fn draw(&mut self, canvas: &mut Canvas) -> Result<(), String> {
+    // fn draw(&mut self, canvas: &mut WindowCanvas) -> Result<(), String> {
         // canvas.copy(&self.background, None, None).unwrap();
         // Ok(())
 
-        let half_height = CONFIG.height as f32 / 2.0;
-        let incr_angle = CONFIG.fov / CONFIG.width as f32;
+        let half_height = canvas.height as f32 / 2.0;
+        let incr_angle = CONFIG.fov / canvas.width as f32;
         let mut ray_angle = self.player.angle - CONFIG.fov / 2.0;
         let query = self.background.query();
 
@@ -289,11 +291,26 @@ impl Renderer for Raycaster {
 
             let hypothenuse = self.player.pos.dist(&ray.pos);
             let dist = hypothenuse * deg_to_rad(ray_angle - self.player.angle).cos();
-            let wall_height = half_height / dist;
+            let wall_height = (half_height / dist).min(half_height);
 
             // In-memory texture mapping
             let tx = &self.textures[(ray_content - 1) as usize];
             let tx_posx = ((tx.width as f32 * (ray.pos.x + ray.pos.y)).floor() as i32) % tx.width;
+
+            canvas.draw_vertical_line(
+                x,
+                0,
+                (half_height - wall_height) as i32,
+                0, 0, 255,
+            );
+
+            canvas.draw_vertical_line(
+                x,
+                (half_height - wall_height) as i32,
+                (half_height + wall_height) as i32,
+                0, 255, 0,
+            );
+
 
             // canvas.set_draw_color(Color::RGB(30, 30, 30));
             // canvas.draw_line(
@@ -301,34 +318,41 @@ impl Renderer for Raycaster {
             //     RectPoint::new(x, (half_height - wall_height) as i32),
             // )?;
             // self.draw_background_strip(canvas, x, 0, (half_height - wall_height) as i32);
-            canvas
-                .copy(
-                    &self.background,
-                    Rect::new(
-                        (x + self.player.angle as i32).abs() % query.width as i32,
-                        0,
-                        1,
-                        (half_height - wall_height) as u32,
-                    ),
-                    Rect::new(
-                        x.abs() % query.width as i32,
-                        0,
-                        1,
-                        (half_height - wall_height) as u32,
-                    ),
-                )
-                .unwrap();
+            // canvas
+            //     .copy(
+            //         &self.background,
+            //         Rect::new(
+            //             (x + self.player.angle as i32).abs() % query.width as i32,
+            //             0,
+            //             1,
+            //             (half_height - wall_height) as u32,
+            //         ),
+            //         Rect::new(
+            //             x.abs() % query.width as i32,
+            //             0,
+            //             1,
+            //             (half_height - wall_height) as u32,
+            //         ),
+            //     )
+            //     .unwrap();
+            //
+            // self.draw_texture_strip(canvas, x, wall_height, tx_posx, tx);
 
-            self.draw_texture_strip(canvas, x, wall_height, tx_posx, tx);
+            // canvas.set_draw_color(Color::GRAY);
+            canvas.draw_vertical_line(
+                x,
+                (half_height + wall_height) as i32,
+                CONFIG.height,
+                128, 0, 0,
+            );
 
-            canvas.set_draw_color(Color::GRAY);
-            canvas.draw_line(
-                RectPoint::new(x, (half_height + wall_height) as i32),
-                RectPoint::new(x, CONFIG.height),
-            )?;
+            // canvas.draw_vertical_line(x, 0, 300, 255, 255, 255);
 
             ray_angle += incr_angle;
         }
+
+        // canvas.draw_vertical_line(300, 0, canvas.height as i32, 255, 0, 0);
+        // canvas.set_pixel(320, 240, 255, 255, 255);
 
         Ok(())
     }
