@@ -1,14 +1,23 @@
+mod canvas;
 mod config;
 mod math;
 mod raycaster;
 mod system_loop;
 mod utils;
 
+use crate::canvas::Canvas;
 use crate::config::CONFIG;
 use crate::raycaster::Raycaster;
+use sdl2::event::Event;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::render::WindowCanvas;
 use sdl2::*;
+
+// Trait every render logic has to implement.
+pub trait Renderer {
+    fn update(&mut self, events: Vec<Event>) -> bool;
+    fn draw(&mut self, canvas: &mut Canvas) -> Result<(), String>;
+}
 
 fn main() -> Result<(), String> {
     // Gather all relevant objects from the SDL context.

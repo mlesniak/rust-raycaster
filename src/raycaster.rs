@@ -1,6 +1,5 @@
 use crate::math::*;
-use crate::system_loop::{Canvas, Renderer};
-use crate::{utils, CONFIG};
+use crate::{utils, CONFIG, Renderer};
 use sdl2::event::Event;
 use sdl2::image;
 use sdl2::image::LoadTexture;
@@ -12,6 +11,7 @@ use sdl2::surface::Surface;
 use sdl2::video::WindowContext;
 use std::cmp::min;
 use std::collections::{HashMap, HashSet};
+use crate::canvas::Canvas;
 
 pub struct Raycaster {
     pub map: Vec<Vec<i32>>,
