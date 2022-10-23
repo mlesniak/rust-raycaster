@@ -1,5 +1,7 @@
+use crate::canvas::Canvas;
 use crate::math::*;
-use crate::{utils, CONFIG, Renderer};
+use crate::texture::Texture;
+use crate::{utils, Renderer, CONFIG};
 use sdl2::event::Event;
 use sdl2::image;
 use sdl2::image::LoadTexture;
@@ -11,8 +13,6 @@ use sdl2::surface::Surface;
 use sdl2::video::WindowContext;
 use std::cmp::min;
 use std::collections::{HashMap, HashSet};
-use crate::canvas::Canvas;
-use crate::texture::Texture;
 
 pub struct Raycaster {
     pub map: Vec<Vec<i32>>,
@@ -20,9 +20,6 @@ pub struct Raycaster {
 
     // Cache loaded assets
     textures: Vec<Texture>,
-
-    // TODO(mlesniak) Can our background be just a texture?
-    background: Texture,
 
     // Contains the keys which are currently pressed. Most
     // libraries (libgdx and sdl2) do not have proper key
@@ -64,55 +61,6 @@ impl Ray {
     }
 }
 
-// In our implementation we allow both inmemory textures
-// as well as images. External images are converted to
-// our internal format as well; since we render line
-// segments images should not have too many colors.
-//
-// In our map file textures are referred by their position
-// in the returned vector plus one since 0 means empty
-// space in the map.
-fn load_textures() -> Vec<Texture> {
-    vec![
-        // Basic brick texture.
-        Texture {
-            width: 8,
-            height: 8,
-            map: vec![
-                vec![1, 1, 1, 1, 1, 1, 1, 1],
-                vec![0, 0, 0, 1, 0, 0, 0, 1],
-                vec![1, 1, 1, 1, 1, 1, 1, 1],
-                vec![0, 1, 0, 0, 0, 1, 0, 0],
-                vec![1, 1, 1, 1, 1, 1, 1, 1],
-                vec![0, 0, 0, 1, 0, 0, 0, 1],
-                vec![1, 1, 1, 1, 1, 1, 1, 1],
-                vec![0, 1, 0, 0, 0, 1, 0, 0],
-            ],
-            colors: vec![Color::RGB(0, 0, 0), Color::RGB(255, 255, 255)],
-        },
-        // Flat segment.
-        Texture {
-            width: 8,
-            height: 8,
-            map: vec![
-                vec![1, 1, 1, 1, 1, 1, 1, 1],
-                vec![1, 1, 1, 1, 1, 1, 1, 1],
-                vec![1, 1, 1, 1, 1, 1, 1, 1],
-                vec![1, 1, 1, 1, 1, 1, 1, 1],
-                vec![1, 1, 1, 1, 1, 1, 1, 1],
-                vec![1, 1, 1, 1, 1, 1, 1, 1],
-                vec![1, 1, 1, 1, 1, 1, 1, 1],
-                vec![1, 1, 1, 1, 1, 1, 1, 1],
-            ],
-            colors: vec![Color::RGB(40, 40, 40), Color::RGB(255, 0, 0)],
-        },
-        // Image-based brick texture.
-        Texture::load("images/texture.png").unwrap(),
-        // 🐕 (Suki)
-        Texture::load("images/dog.png").unwrap(),
-    ]
-}
-
 impl Raycaster {
     pub fn new() -> Raycaster {
         Raycaster {
@@ -122,9 +70,59 @@ impl Raycaster {
                 angle: 00.0,
             },
             textures: load_textures(),
-            background: Texture::load("images/background.png").unwrap(),
             pressed_keys: HashSet::new(),
         }
+    }
+
+    // In our implementation we allow both in-memory textures
+    // as well as external images. External images are converted
+    // to our internal format as well; since we index by color,
+    // images should not have too many colors.
+    //
+    // In our map file textures are referred by their position
+    // in the returned vector plus one since 0 means empty
+    // space in the map.
+    fn load_textures() -> Vec<Texture> {
+        vec![
+            // Background texture.
+            Texture::load("images/background.png").unwrap(),
+            // Basic brick texture.
+            Texture {
+                width: 8,
+                height: 8,
+                map: vec![
+                    vec![1, 1, 1, 1, 1, 1, 1, 1],
+                    vec![0, 0, 0, 1, 0, 0, 0, 1],
+                    vec![1, 1, 1, 1, 1, 1, 1, 1],
+                    vec![0, 1, 0, 0, 0, 1, 0, 0],
+                    vec![1, 1, 1, 1, 1, 1, 1, 1],
+                    vec![0, 0, 0, 1, 0, 0, 0, 1],
+                    vec![1, 1, 1, 1, 1, 1, 1, 1],
+                    vec![0, 1, 0, 0, 0, 1, 0, 0],
+                ],
+                colors: vec![Color::RGB(0, 0, 0), Color::RGB(255, 255, 255)],
+            },
+            // Flat segment.
+            Texture {
+                width: 8,
+                height: 8,
+                map: vec![
+                    vec![1, 1, 1, 1, 1, 1, 1, 1],
+                    vec![1, 1, 1, 1, 1, 1, 1, 1],
+                    vec![1, 1, 1, 1, 1, 1, 1, 1],
+                    vec![1, 1, 1, 1, 1, 1, 1, 1],
+                    vec![1, 1, 1, 1, 1, 1, 1, 1],
+                    vec![1, 1, 1, 1, 1, 1, 1, 1],
+                    vec![1, 1, 1, 1, 1, 1, 1, 1],
+                    vec![1, 1, 1, 1, 1, 1, 1, 1],
+                ],
+                colors: vec![Color::RGB(40, 40, 40), Color::RGB(255, 0, 0)],
+            },
+            // Image-based brick texture.
+            Texture::load("images/texture.png").unwrap(),
+            // 🐕 (Suki)
+            Texture::load("images/dog.png").unwrap(),
+        ]
     }
 }
 
@@ -134,6 +132,7 @@ impl Renderer for Raycaster {
         let player_rotation = 3.0;
         let player_radius = 5.0;
 
+        // Quit on escape and update hashset of pressed keys.
         for event in events.iter() {
             match event {
                 Event::Quit { .. }
@@ -165,6 +164,7 @@ impl Renderer for Raycaster {
                 Keycode::D => {
                     self.player.angle += player_rotation;
                 }
+                // TODO(mlesniak) Refactor this
                 Keycode::W => {
                     let dx = deg_to_rad(self.player.angle).cos() * player_speed;
                     let dy = deg_to_rad(self.player.angle).sin() * player_speed;
@@ -202,10 +202,6 @@ impl Renderer for Raycaster {
     }
 
     fn draw(&mut self, canvas: &mut Canvas) -> Result<(), String> {
-        // fn draw(&mut self, canvas: &mut WindowCanvas) -> Result<(), String> {
-        // canvas.copy(&self.background, None, None).unwrap();
-        // Ok(())
-
         let half_height = canvas.height as f32 / 2.0;
         let incr_angle = CONFIG.fov / canvas.width as f32;
         let mut ray_angle = self.player.angle - CONFIG.fov / 2.0;
@@ -213,51 +209,26 @@ impl Renderer for Raycaster {
         for x in 0..CONFIG.width {
             let mut ray = Ray::new(self.player.pos.x, self.player.pos.y, ray_angle);
 
-            let mut ray_content = 0;
-            while ray_content == 0 {
+            let mut ray_collision = 0;
+            while ray_collision == 0 {
                 ray.advance();
                 let (x, y) = ray.pos.floor();
-                ray_content = self.map[y][x];
+                ray_collision = self.map[y][x];
             }
 
             let hypothenuse = self.player.pos.dist(&ray.pos);
             let dist = hypothenuse * deg_to_rad(ray_angle - self.player.angle).cos();
             let wall_height = (half_height / dist);
-            // let wall_height = (half_height / dist).min(half_height);
 
-            // In-memory texture mapping
-            let tx = &self.textures[(ray_content - 1) as usize];
+            // Use the collision values from the map as the index into our list
+            // of textures.
+            let tx = &self.textures[(ray_collision - 1) as usize];
             let tx_posx = ((tx.width as f32 * (ray.pos.x + ray.pos.y)).floor() as i32) % tx.width;
 
-            canvas.draw_vertical_line(x, 0, (half_height - wall_height) as i32, 0, 0, 255);
-
-            // canvas.set_draw_color(Color::RGB(30, 30, 30));
-            // canvas.draw_line(
-            //     RectPoint::new(x, 0),
-            //     RectPoint::new(x, (half_height - wall_height) as i32),
-            // )?;
-            self.draw_background_strip(canvas, x, 0, (half_height - wall_height) as i32);
-            // canvas
-            //     .copy(
-            //         &self.background,
-            //         Rect::new(
-            //             (x + self.player.angle as i32).abs() % query.width as i32,
-            //             0,
-            //             1,
-            //             (half_height - wall_height) as u32,
-            //         ),
-            //         Rect::new(
-            //             x.abs() % query.width as i32,
-            //             0,
-            //             1,
-            //             (half_height - wall_height) as u32,
-            //         ),
-            //     )
-            //     .unwrap();
-            //
-
+            // Draw pixel a) above the collision wall, b) the collions wall and
+            // c) the floor, using the wall_height as the base reference.
+            self.draw_background_strip(canvas, 0, x, 0, (half_height - wall_height) as i32);
             self.draw_texture_strip(canvas, x, wall_height, tx_posx, tx);
-
             canvas.draw_vertical_line(
                 x,
                 (half_height + wall_height) as i32,
@@ -270,27 +241,28 @@ impl Renderer for Raycaster {
             ray_angle += incr_angle;
         }
 
-        // canvas.draw_vertical_line(300, 0, canvas.height as i32, 255, 0, 0);
-        // canvas.set_pixel(320, 240, 255, 255, 255);
-
         Ok(())
     }
 }
 
 impl Raycaster {
-    fn draw_background_strip(&self, canvas: &mut Canvas, x: i32, y1: i32, y2: i32) {
+    fn draw_background_strip(
+        &self,
+        canvas: &mut Canvas,
+        background_texture: usize,
+        x: i32,
+        y1: i32,
+        y2: i32,
+    ) {
+        let texture = &self.textures[background_texture];
         let start = x + self.player.angle as i32;
-        let tx = (start % self.background.width).abs() as usize;
+        let tx = (start % texture.width).abs() as usize;
 
         for y in y1..y2 {
-            let ty = (y % self.background.height) as usize;
-            let idx = self.background.map[ty][tx] as usize;
-            let c = self.background.colors[idx];
+            let ty = (y % texture.height) as usize;
+            let idx = texture.map[ty][tx] as usize;
+            let c = texture.colors[idx];
             canvas.set_pixel(x, y, c.r, c.g, c.b);
-
-            // canvas.set_draw_color(c);
-            // TODO(mlesniak) draw_points
-            // canvas.draw_point(sdl2::rect::Point::new(x, y)).unwrap();
         }
     }
 
