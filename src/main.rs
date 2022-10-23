@@ -28,8 +28,11 @@ fn main() -> Result<(), String> {
         .expect("Canvas subsystem error");
     let mut event_pump = sdl_context.event_pump().expect("Event Pump error");
 
-    let mut texture_creator = canvas.texture_creator();
-    let mut renderer = Raycaster::new(&texture_creator);
+    // Actual logic is defined in an implementation of Renderer and is
+    // independent of any graphic library. Instead we solely need an
+    // implementation of the Canvas trait to draw vertial lines and
+    // single pixels.
+    let mut renderer = Raycaster::new();
 
     system_loop::run(&mut renderer, &mut event_pump, &mut canvas)
 }

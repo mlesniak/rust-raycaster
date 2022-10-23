@@ -176,7 +176,7 @@ fn load_textures() -> Vec<Texture> {
 }
 
 impl Raycaster {
-    pub fn new(texture_creator: &TextureCreator<WindowContext>) -> Raycaster {
+    pub fn new() -> Raycaster {
         let background = Texture::load("images/background.png").unwrap();
         // let surface: Surface = image::LoadSurface::from_file("background.png")?;
         // let bg = texture_creator.load_texture("background.png").unwrap();
