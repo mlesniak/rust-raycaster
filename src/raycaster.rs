@@ -12,6 +12,7 @@ use sdl2::video::WindowContext;
 use std::cmp::min;
 use std::collections::{HashMap, HashSet};
 use crate::canvas::Canvas;
+use crate::texture::Texture;
 
 pub struct Raycaster {
     pub map: Vec<Vec<i32>>,
@@ -19,14 +20,36 @@ pub struct Raycaster {
 
     // Cache loaded assets
     textures: Vec<Texture>,
+
+    // TODO(mlesniak) Can our background be just a texture?
     background: Texture,
 
-    // Internal state.
+    // Contains the keys which are currently pressed. Most
+    // libraries (libgdx and sdl2) do not have proper key
+    // pressed support, so we have to simulate it: when a
+    // key is pressed, it's added to this set, when it's
+    // released, it's removed. In the meantime we can look
+    // at this set and simulate that the key is pressed
+    // all the time.
     pressed_keys: HashSet<Keycode>,
+}
+
+pub struct Player {
+    pos: Point,
+    angle: f32,
+}
+
+struct Ray {
+    pos: Point,
+    dx: f32,
+    dy: f32,
 }
 
 impl Ray {
     fn new(x: f32, y: f32, angle: f32) -> Ray {
+        // Number of steps from player's position in the
+        // angle direction to check for collisions. Smaller
+        // values are faster but also more imprecise.
         let precision = 64.0;
         Ray {
             pos: Point { x, y },
@@ -41,105 +64,17 @@ impl Ray {
     }
 }
 
-pub struct Player {
-    pos: Point,
-    angle: f32,
-}
-
-struct Ray {
-    pos: Point,
-    dx: f32,
-    dy: f32,
-}
-
-struct Point {
-    x: f32,
-    y: f32,
-}
-
-impl Point {
-    fn dist(&self, p: &Point) -> f32 {
-        ((self.x - p.x).powi(2) + (self.y - p.y).powi(2)).sqrt()
-    }
-
-    fn add(&self, p: Point) -> Point {
-        Point {
-            x: self.x + p.x,
-            y: self.y + p.y,
-        }
-    }
-
-    fn sub(&self, p: Point) -> Point {
-        Point {
-            x: self.x - p.x,
-            y: self.y - p.y,
-        }
-    }
-
-    fn floor(&self) -> (usize, usize) {
-        (self.x.floor() as usize, self.y.floor() as usize)
-    }
-}
-
-#[derive(Debug)]
-pub struct Texture {
-    width: i32,
-    height: i32,
-    map: Vec<Vec<i32>>,
-    colors: Vec<Color>,
-}
-
-impl Texture {
-    pub fn load(filename: &str) -> Result<Texture, String> {
-        // TODO(mlesniak) Refactor this
-        let surface: Surface = image::LoadSurface::from_file(filename)?;
-
-        let mut counter = 0;
-        let mut colors: HashMap<Color, i32> = HashMap::new();
-
-        let mut map: Vec<Vec<i32>> = vec![];
-        let mut row: Vec<i32> = vec![];
-
-        surface.with_lock(|pixels| {
-            for i in (0..pixels.len()).step_by(3) {
-                if i != 0 && i as u32 % (surface.width() * 3) == 0 {
-                    map.push(row.clone());
-                    row = vec![];
-                }
-                let color = Color::RGB(pixels[i], pixels[i + 1], pixels[i + 2]);
-                match colors.get(&color) {
-                    None => {
-                        row.push(counter);
-                        colors.insert(color, counter);
-                        counter += 1;
-                    }
-                    Some(idx) => {
-                        row.push(*idx);
-                    }
-                }
-            }
-        });
-        map.push(row);
-
-        let mut indexed_colors: Vec<Color> = vec![Color::BLACK; colors.len()];
-        for color in colors.keys() {
-            let idx = colors[color] as usize;
-            indexed_colors[idx] = *color;
-        }
-
-        Ok(Texture {
-            width: surface.width() as i32,
-            height: surface.height() as i32,
-            map,
-            colors: indexed_colors,
-        })
-    }
-}
-
-// Until we load it from a file
-#[inline]
+// In our implementation we allow both inmemory textures
+// as well as images. External images are converted to
+// our internal format as well; since we render line
+// segments images should not have too many colors.
+//
+// In our map file textures are referred by their position
+// in the returned vector plus one since 0 means empty
+// space in the map.
 fn load_textures() -> Vec<Texture> {
     vec![
+        // Basic brick texture.
         Texture {
             width: 8,
             height: 8,
@@ -153,8 +88,9 @@ fn load_textures() -> Vec<Texture> {
                 vec![1, 1, 1, 1, 1, 1, 1, 1],
                 vec![0, 1, 0, 0, 0, 1, 0, 0],
             ],
-            colors: vec![Color::RGB(40, 40, 40), Color::RGB(60, 60, 60)],
+            colors: vec![Color::RGB(0, 0, 0), Color::RGB(255, 255, 255)],
         },
+        // Flat segment.
         Texture {
             width: 8,
             height: 8,
@@ -170,19 +106,15 @@ fn load_textures() -> Vec<Texture> {
             ],
             colors: vec![Color::RGB(40, 40, 40), Color::RGB(255, 0, 0)],
         },
+        // Image-based brick texture.
         Texture::load("images/texture.png").unwrap(),
-        Texture::load("images/suki.png").unwrap(),
+        // 🐕 (Suki)
+        Texture::load("images/dog.png").unwrap(),
     ]
 }
 
 impl Raycaster {
     pub fn new() -> Raycaster {
-        let background = Texture::load("images/background.png").unwrap();
-        // let surface: Surface = image::LoadSurface::from_file("background.png")?;
-        // let bg = texture_creator.load_texture("background.png").unwrap();
-
-        // println!("{} / {}", background.width, background.height);
-
         Raycaster {
             map: utils::read_map(),
             player: Player {
@@ -190,7 +122,7 @@ impl Raycaster {
                 angle: 00.0,
             },
             textures: load_textures(),
-            background,
+            background: Texture::load("images/background.png").unwrap(),
             pressed_keys: HashSet::new(),
         }
     }

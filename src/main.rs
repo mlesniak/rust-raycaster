@@ -4,6 +4,7 @@ mod math;
 mod raycaster;
 mod system_loop;
 mod utils;
+mod texture;
 
 use crate::canvas::Canvas;
 use crate::config::CONFIG;
