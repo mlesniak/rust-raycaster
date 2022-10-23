@@ -181,6 +181,51 @@ impl Raycaster {
             self.player.pos.x = np.x;
         }
     }
+
+    fn draw_background_strip(
+        &self,
+        canvas: &mut Canvas,
+        background_texture: usize,
+        x: i32,
+        y1: i32,
+        y2: i32,
+    ) {
+        let texture = &self.textures[background_texture];
+        let start = x + self.player.angle as i32;
+        let tx = (start % texture.width).abs() as usize;
+
+        for y in y1..y2 {
+            let ty = (y % texture.height) as usize;
+            let idx = texture.map[ty][tx] as usize;
+            let c = texture.colors[idx];
+            canvas.set_pixel(x, y, c.r, c.g, c.b);
+        }
+    }
+
+    fn draw_texture_strip(
+        &self,
+        canvas: &mut Canvas,
+        x: i32,
+        wall_height: f32,
+        tx_posx: i32,
+        tx: &Texture,
+    ) {
+        let y_incr = wall_height * 2.0 / tx.height as f32;
+        let mut y = CONFIG.height as f32 / 2.0 - wall_height;
+
+        for i in 0..tx.height as usize {
+            let tx_val = tx.map[i][tx_posx as usize] as usize;
+            canvas.draw_vertical_line(
+                x,
+                y as i32,
+                (y + y_incr) as i32,
+                tx.colors[tx_val].r,
+                tx.colors[tx_val].g,
+                tx.colors[tx_val].b,
+            );
+            y += y_incr;
+        }
+    }
 }
 
 impl Renderer for Raycaster {
@@ -232,9 +277,13 @@ impl Renderer for Raycaster {
             let dist = hypothenuse * deg_to_rad(ray_angle - self.player.angle).cos();
             let wall_height = (half_height / dist);
 
-            // Use the collision values from the map as the index into our list
-            // of textures.
+            // Use the collision values from the map as the index
+            // into our list of textures.
             let tx = &self.textures[(ray_collision - 1) as usize];
+            // Since we only have orthogonal angles we needs to scan textures
+            // either in x or y direction and use the addition of x and y of
+            // the ray. Given it's orthogonal, one of these values will always
+            // be constant.
             let tx_posx = ((tx.width as f32 * (ray.pos.x + ray.pos.y)).floor() as i32) % tx.width;
 
             // Draw pixel a) above the collision wall, b) the collions wall and
@@ -254,60 +303,5 @@ impl Renderer for Raycaster {
         }
 
         Ok(())
-    }
-}
-
-impl Raycaster {
-    fn draw_background_strip(
-        &self,
-        canvas: &mut Canvas,
-        background_texture: usize,
-        x: i32,
-        y1: i32,
-        y2: i32,
-    ) {
-        let texture = &self.textures[background_texture];
-        let start = x + self.player.angle as i32;
-        let tx = (start % texture.width).abs() as usize;
-
-        for y in y1..y2 {
-            let ty = (y % texture.height) as usize;
-            let idx = texture.map[ty][tx] as usize;
-            let c = texture.colors[idx];
-            canvas.set_pixel(x, y, c.r, c.g, c.b);
-        }
-    }
-
-    fn draw_texture_strip(
-        &self,
-        canvas: &mut Canvas,
-        x: i32,
-        wall_height: f32,
-        tx_posx: i32,
-        tx: &Texture,
-    ) {
-        let y_incr = wall_height * 2.0 / tx.height as f32;
-        let mut y = CONFIG.height as f32 / 2.0 - wall_height;
-
-        for i in 0..tx.height as usize {
-            let tx_val = tx.map[i][tx_posx as usize] as usize;
-            canvas.draw_vertical_line(
-                x,
-                y as i32,
-                (y + y_incr) as i32,
-                tx.colors[tx_val].r,
-                tx.colors[tx_val].g,
-                tx.colors[tx_val].b,
-            );
-            // canvas.set_draw_color(tx.colors[tx_val]);
-            // canvas
-            //     .draw_line(
-            //         sdl2::rect::Point::new(x, y as i32),
-            //         sdl2::rect::Point::new(x, (y + y_incr) as i32),
-            //     )
-            //     .unwrap();
-
-            y += y_incr;
-        }
     }
 }
