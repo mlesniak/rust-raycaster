@@ -15,10 +15,8 @@ pub const CONFIG: Config = Config {
 
 #[cfg(not(debug_assertions))]
 pub const CONFIG: Config = Config {
-    // width: 1280,
-    // height: 960,
-    width: 640,
-    height: 480,
+    width: 1280,
+    height: 960,
     fps: 60,
     fov: 60.0,
 };
