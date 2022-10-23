@@ -14,18 +14,17 @@ pub trait Renderer {
 }
 
 pub struct Canvas {
-    // TODO(mlesniak) right type?
-    pub width: usize,
-    pub height: usize,
+    pub width: u32,
+    pub height: u32,
     pub pixels: Vec<u8>,
 }
 
 impl Canvas {
-    pub fn new(width: usize, height: usize) -> Canvas {
+    pub fn new(width: u32, height: u32) -> Canvas {
         Canvas {
             width,
             height,
-            pixels: vec![0; width * height * 3],
+            pixels: vec![0; (width * height * 3) as usize],
         }
     }
 
@@ -62,7 +61,7 @@ pub fn run(
         )
         .unwrap();
 
-    let mut c = Canvas::new(CONFIG.width as usize, CONFIG.height as usize);
+    let mut c = Canvas::new(CONFIG.width as u32, CONFIG.height as u32);
     loop {
         let now = Instant::now();
         let events = event_pump.poll_iter().collect();
