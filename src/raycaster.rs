@@ -69,7 +69,7 @@ impl Raycaster {
                 pos: Point { x: 2.0, y: 2.0 },
                 angle: 00.0,
             },
-            textures: load_textures(),
+            textures: Raycaster::load_textures(),
             pressed_keys: HashSet::new(),
         }
     }
@@ -124,14 +124,67 @@ impl Raycaster {
             Texture::load("images/dog.png").unwrap(),
         ]
     }
-}
 
-impl Renderer for Raycaster {
-    fn update(&mut self, events: Vec<Event>) -> bool {
+    fn handle_pressed_keys(&mut self) {
+        // Could be moved to CONFIG, but currently I don't see
+        // the necessity and am note sure if CONFIG is the best
+        // place for these ("single used here" - values).
         let player_speed = 0.1;
         let player_rotation = 3.0;
         let player_radius = 5.0;
 
+        // Handle all currently pressed keys.
+        for keycode in self.pressed_keys.clone().into_iter() {
+            match keycode {
+                Keycode::A => {
+                    self.player.angle -= player_rotation;
+                }
+                Keycode::D => {
+                    self.player.angle += player_rotation;
+                }
+                Keycode::W => {
+                    // Can this be simplified? Probably by adding some
+                    // directional parameters +1 or -1 to a helper function.
+                    // Would this make the following lines more readable?
+                    // Probably not...
+                    let dx = deg_to_rad(self.player.angle).cos() * player_speed;
+                    let dy = deg_to_rad(self.player.angle).sin() * player_speed;
+                    let np = self.player.pos.add(Point { x: dx, y: dy });
+                    let cx = (np.x + dx * player_radius).floor() as usize;
+                    let cy = (np.y + dy * player_radius).floor() as usize;
+                    self.update_player_position(np, cx, cy)
+                }
+                Keycode::S => {
+                    let dx = deg_to_rad(self.player.angle).cos() * player_speed;
+                    let dy = deg_to_rad(self.player.angle).sin() * player_speed;
+                    let np = self.player.pos.sub(Point { x: dx, y: dy });
+                    let cx = (np.x - dx * player_radius).floor() as usize;
+                    let cy = (np.y - dy * player_radius).floor() as usize;
+                    self.update_player_position(np, cx, cy)
+                }
+
+                _ => {}
+            }
+        }
+    }
+
+    // If the player can move to the new position, move them.
+    // Otherwise ignore the movement. We do this indepedently
+    // for both x and y values to allow the player to glide
+    // at walls.
+    fn update_player_position(&mut self, np: Point, cx: usize, cy: usize) {
+        let (x, y) = np.floor();
+        if self.map[cy][x] == 0 {
+            self.player.pos.y = np.y;
+        }
+        if self.map[y][cx] == 0 {
+            self.player.pos.x = np.x;
+        }
+    }
+}
+
+impl Renderer for Raycaster {
+    fn update(&mut self, events: Vec<Event>) -> bool {
         // Quit on escape and update hashset of pressed keys.
         for event in events.iter() {
             match event {
@@ -156,48 +209,7 @@ impl Renderer for Raycaster {
             }
         }
 
-        for keycode in self.pressed_keys.clone().into_iter() {
-            match keycode {
-                Keycode::A => {
-                    self.player.angle -= player_rotation;
-                }
-                Keycode::D => {
-                    self.player.angle += player_rotation;
-                }
-                // TODO(mlesniak) Refactor this
-                Keycode::W => {
-                    let dx = deg_to_rad(self.player.angle).cos() * player_speed;
-                    let dy = deg_to_rad(self.player.angle).sin() * player_speed;
-                    let np = self.player.pos.add(Point { x: dx, y: dy });
-                    let cx = (np.x + dx * player_radius).floor() as usize;
-                    let cy = (np.y + dy * player_radius).floor() as usize;
-                    let (x, y) = np.floor();
-                    if self.map[cy][x] == 0 {
-                        self.player.pos.y = np.y;
-                    }
-                    if self.map[y][cx] == 0 {
-                        self.player.pos.x = np.x;
-                    }
-                }
-                Keycode::S => {
-                    let dx = deg_to_rad(self.player.angle).cos() * player_speed;
-                    let dy = deg_to_rad(self.player.angle).sin() * player_speed;
-                    let np = self.player.pos.sub(Point { x: dx, y: dy });
-                    let cx = (np.x - dx * player_radius).floor() as usize;
-                    let cy = (np.y - dy * player_radius).floor() as usize;
-                    let (x, y) = np.floor();
-                    if self.map[cy][x] == 0 {
-                        self.player.pos.y = np.y;
-                    }
-                    if self.map[y][cx] == 0 {
-                        self.player.pos.x = np.x;
-                    }
-                }
-
-                _ => {}
-            }
-        }
-
+        self.handle_pressed_keys();
         true
     }
 
