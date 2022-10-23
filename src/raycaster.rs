@@ -170,14 +170,14 @@ fn load_textures() -> Vec<Texture> {
             ],
             colors: vec![Color::RGB(40, 40, 40), Color::RGB(255, 0, 0)],
         },
-        Texture::load("texture.png").unwrap(),
-        Texture::load("suki.png").unwrap(),
+        Texture::load("images/texture.png").unwrap(),
+        Texture::load("images/suki.png").unwrap(),
     ]
 }
 
 impl Raycaster {
     pub fn new(texture_creator: &TextureCreator<WindowContext>) -> Raycaster {
-        let background = Texture::load("background.png").unwrap();
+        let background = Texture::load("images/background.png").unwrap();
         // let surface: Surface = image::LoadSurface::from_file("background.png")?;
         // let bg = texture_creator.load_texture("background.png").unwrap();
 
