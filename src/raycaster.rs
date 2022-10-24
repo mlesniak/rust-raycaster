@@ -184,7 +184,7 @@ impl Raycaster {
     ) {
         let texture = &self.textures[background_texture];
         let start = x + self.player.angle as i32;
-        let tx = (start % texture.width).abs() as usize;
+        let tx = (start % texture.width).unsigned_abs() as usize;
 
         for y in y1..y2 {
             let ty = (y % texture.height) as usize;
