@@ -1,9 +1,7 @@
 use std::time::{Duration, Instant};
 
 use crate::canvas::Canvas;
-use sdl2::event::Event;
-use sdl2::pixels::{Color, PixelFormatEnum};
-use sdl2::rect::Point;
+use sdl2::pixels::PixelFormatEnum;
 use sdl2::render::WindowCanvas;
 use sdl2::*;
 
@@ -83,6 +81,6 @@ fn log_missed_fps(missed_ms: i32) {
 }
 
 #[cfg(not(feature = "debug"))]
-fn log_missed_fps(missed_ms: i32) {
+fn log_missed_fps(_missed_ms: i32) {
     // Intentionally empty.
 }

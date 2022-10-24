@@ -3,15 +3,8 @@ use crate::math::*;
 use crate::texture::{Color, Texture};
 use crate::{utils, Renderer, CONFIG};
 use sdl2::event::Event;
-use sdl2::image;
-use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
-use sdl2::rect::{Point as RectPoint, Rect};
-use sdl2::render::{TextureCreator, WindowCanvas};
-use sdl2::surface::Surface;
-use sdl2::video::WindowContext;
-use std::cmp::min;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 pub struct Raycaster {
     pub map: Vec<Vec<i32>>,
@@ -274,7 +267,7 @@ impl Renderer for Raycaster {
 
             let hypothenuse = self.player.pos.dist(&ray.pos);
             let dist = hypothenuse * deg_to_rad(ray_angle - self.player.angle).cos();
-            let wall_height = (half_height / dist);
+            let wall_height = half_height / dist;
 
             // Use the collision values from the map as the index
             // into our list of textures.

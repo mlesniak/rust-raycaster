@@ -10,7 +10,6 @@ use crate::canvas::Canvas;
 use crate::config::CONFIG;
 use crate::raycaster::Raycaster;
 use sdl2::event::Event;
-use sdl2::pixels::PixelFormatEnum;
 use sdl2::render::WindowCanvas;
 use sdl2::*;
 
