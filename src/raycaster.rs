@@ -1,12 +1,11 @@
 use crate::canvas::Canvas;
 use crate::math::*;
-use crate::texture::Texture;
+use crate::texture::{Color, Texture};
 use crate::{utils, Renderer, CONFIG};
 use sdl2::event::Event;
 use sdl2::image;
 use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
-use sdl2::pixels::Color;
 use sdl2::rect::{Point as RectPoint, Rect};
 use sdl2::render::{TextureCreator, WindowCanvas};
 use sdl2::surface::Surface;
@@ -100,7 +99,7 @@ impl Raycaster {
                     vec![1, 1, 1, 1, 1, 1, 1, 1],
                     vec![0, 1, 0, 0, 0, 1, 0, 0],
                 ],
-                colors: vec![Color::RGB(0, 0, 0), Color::RGB(255, 255, 255)],
+                colors: vec![Color(0, 0, 0), Color(255, 255, 255)],
             },
             // Flat segment.
             Texture {
@@ -116,7 +115,7 @@ impl Raycaster {
                     vec![1, 1, 1, 1, 1, 1, 1, 1],
                     vec![1, 1, 1, 1, 1, 1, 1, 1],
                 ],
-                colors: vec![Color::RGB(40, 40, 40), Color::RGB(255, 0, 0)],
+                colors: vec![Color(40, 40, 40), Color(255, 0, 0)],
             },
             // Image-based brick texture.
             Texture::load("images/texture.png").unwrap(),
@@ -198,7 +197,7 @@ impl Raycaster {
             let ty = (y % texture.height) as usize;
             let idx = texture.map[ty][tx] as usize;
             let c = texture.colors[idx];
-            canvas.set_pixel(x, y, c.r, c.g, c.b);
+            canvas.set_pixel(x, y, c.0, c.1, c.2);
         }
     }
 
@@ -219,9 +218,9 @@ impl Raycaster {
                 x,
                 y as i32,
                 (y + y_incr) as i32,
-                tx.colors[tx_val].r,
-                tx.colors[tx_val].g,
-                tx.colors[tx_val].b,
+                tx.colors[tx_val].0,
+                tx.colors[tx_val].1,
+                tx.colors[tx_val].2,
             );
             y += y_incr;
         }

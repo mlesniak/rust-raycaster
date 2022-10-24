@@ -1,7 +1,9 @@
-use std::collections::HashMap;
 use sdl2::image;
-use sdl2::pixels::Color;
 use sdl2::surface::Surface;
+use std::collections::HashMap;
+
+#[derive(Debug,Clone, Eq, PartialEq, Hash, Copy)]
+pub struct Color(pub u8, pub u8, pub u8);
 
 #[derive(Debug)]
 pub struct Texture {
@@ -28,7 +30,7 @@ impl Texture {
                     map.push(row.clone());
                     row = vec![];
                 }
-                let color = Color::RGB(pixels[i], pixels[i + 1], pixels[i + 2]);
+                let color = Color(pixels[i], pixels[i + 1], pixels[i + 2]);
                 match colors.get(&color) {
                     None => {
                         row.push(counter);
@@ -43,7 +45,7 @@ impl Texture {
         });
         map.push(row);
 
-        let mut indexed_colors: Vec<Color> = vec![Color::BLACK; colors.len()];
+        let mut indexed_colors: Vec<Color> = vec![Color(0,0,0); colors.len()];
         for color in colors.keys() {
             let idx = colors[color] as usize;
             indexed_colors[idx] = *color;
