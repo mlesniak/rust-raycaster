@@ -5,7 +5,7 @@ This is a simple raycasting engine in Rust for the sake of learning (and playing
 ```rust
     fn set_pixel(x: i32, y: i32, r: u8, g: u8, b: u8);
 ```
- which shall allow us to draw single pixels. Everything else is done via my own code, hence this might easily be ported to other engines by providing the counterpart of this function and loading images into our own texture format. The texture format allows for inmemory textures as well as loaded images; it shall be easy to extend to dynamic, time-dependent textures, e.g. for blinking, etc.
+ which shall allow us to draw single pixels. Everything else is done via my own code, hence this might easily be ported to other libraries by providing the counterpart of this function and loading images into our own texture format. The texture format allows for inmemory textures as well as loaded images; it shall be easy to extend to dynamic, time-dependent textures, e.g. for blinking, etc.
 
 ![Animation](animation.gif)
 
