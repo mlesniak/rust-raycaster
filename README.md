@@ -9,7 +9,7 @@ This is a simple raycasting engine in Rust for the sake of learning (and playing
 
 ![Animation](animation.gif)
 
-The animation is a bit laggy since it's a gif. The actual output runs smoothly with 60FPS in 1280 x 960 (and probably way higher as well).
+The animation is a bit laggy since it's a gif. The actual output runs smoothly with 60FPS in 1280 x 960 (and probably way higher resolutions as well).
 
 The map format is (hopefully) self-explanatory: every number corresponds to one texture in `Raycaster::load_textures()`, i.e. for the level shown in the animation it is
 
