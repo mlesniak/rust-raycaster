@@ -28,3 +28,7 @@ The map format is (hopefully) self-explanatory: every number corresponds to one 
 
 Please be aware that it's important that the whole area has to be surrounded by walls, i.e. some non-zero block.
 
+To compile and run this, `libsdl2` and its image support (for loading textures) are necessary, i.e.
+
+    brew install sdl2 sdl2_image
+    cargo run --release
